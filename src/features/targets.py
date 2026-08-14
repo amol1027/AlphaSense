@@ -25,8 +25,16 @@ def add_next_hour_target(
         / df["close"]
     )
 
-    df["target_direction"] = (
-        df["target_return"] > 0
+    df["target_direction"] = pd.Series(
+        pd.NA,
+        index=df.index,
+        dtype="Int64",
+    )
+
+    valid_target = df["target_return"].notna()
+
+    df.loc[valid_target, "target_direction"] = (
+        df.loc[valid_target, "target_return"] > 0
     ).astype(int)
 
     return df
