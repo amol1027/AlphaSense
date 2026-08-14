@@ -1,6 +1,8 @@
-asset,published_at,source,headline,text,url
-AAPL,2026-08-10 09:15:00,Example News,Apple reports strong quarterly growth,"Apple reported stronger than expected quarterly results, driven by robust iPhone demand.",https://example.com/1
-AAPL,2026-08-10 11:30:00,Example News,Apple faces supply concerns,"Analysts warned that supply chain constraints could affect Apple's upcoming production.",https://example.com/2
-AAPL,2026-08-10 14:00:00,Example News,Apple expands services business,"Apple announced expansion of its services business into additional markets.",https://example.com/3
-MSFT,2026-08-10 10:00:00,Example News,Microsoft beats expectations,"Microsoft reported earnings above analyst expectations with strong cloud growth.",https://example.com/4
-MSFT,2026-08-10 15:00:00,Example News,Microsoft faces regulatory pressure,"Microsoft faces increased regulatory scrutiny in several markets.",https://example.com/5
+asset,exchange,published_at,source,headline,text,url
+TCS,NSE,2026-08-10 09:20:00,Example News,TCS reports strong growth,"TCS reported strong quarterly growth and robust demand.",https://example.com/1
+TCS,NSE,2026-08-10 09:55:00,Example News,TCS wins major contract,"TCS announced a major new contract with an international client.",https://example.com/2
+TCS,NSE,2026-08-10 10:20:00,Example News,TCS revenue rises 20 percent,"TCS announced that revenue increased by 20 percent.",https://example.com/3
+TCS,NSE,2026-08-10 10:45:00,Example News,TCS faces regulatory concerns,"TCS faces increased regulatory scrutiny.",https://example.com/4
+TCS,NSE,2026-08-10 11:10:00,Example News,TCS expands operations,"TCS announced expansion into additional markets.",https://example.com/5
+RELIANCE,NSE,2026-08-10 09:30:00,Example News,Reliance reports strong performance,"Reliance reported strong performance across several business segments.",https://example.com/6
+RELIANCE,NSE,2026-08-10 10:35:00,Example News,Reliance faces concerns,"Analysts raised concerns about near-term performance.",https://example.com/7

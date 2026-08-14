@@ -10,6 +10,7 @@ def load_news(path: str) -> list[NewsArticle]:
 
     required_columns = {
         "asset",
+        "exchange",
         "published_at",
         "source",
         "headline",
@@ -29,6 +30,7 @@ def load_news(path: str) -> list[NewsArticle]:
     for _, row in df.iterrows():
         article = NewsArticle(
             asset=row["asset"],
+            exchange=row["exchange"],
             published_at=row["published_at"],
             source=row["source"],
             headline=row["headline"],

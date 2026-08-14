@@ -7,6 +7,22 @@ def test_sentiment_aggregation():
     df = pd.DataFrame(
         {
             "asset": ["AAPL", "AAPL", "AAPL", "MSFT", "MSFT"],
+            "exchange": [
+                "NSE",
+                "NSE",
+                "NSE",
+                "NSE",
+                "NSE",
+            ],
+            "prediction_timestamp": pd.to_datetime(
+                [
+                    "2026-08-10 10:15:00",
+                    "2026-08-10 10:15:00",
+                    "2026-08-10 10:15:00",
+                    "2026-08-10 10:15:00",
+                    "2026-08-10 10:15:00",
+                ]
+            ),
             "sentiment_score": [
                 0.75,
                 -0.75,
@@ -33,8 +49,17 @@ def test_sentiment_aggregation():
 
     result = aggregate_sentiment(df)
 
-    aapl = result[result["asset"] == "AAPL"].iloc[0]
-    msft = result[result["asset"] == "MSFT"].iloc[0]
+    aapl = result[
+        (result["asset"] == "AAPL")
+        & (result["prediction_timestamp"]
+           == pd.Timestamp("2026-08-10 10:15:00"))
+    ].iloc[0]
+
+    msft = result[
+        (result["asset"] == "MSFT")
+        & (result["prediction_timestamp"]
+           == pd.Timestamp("2026-08-10 10:15:00"))
+    ].iloc[0]
 
     assert aapl["sentiment_mean"] == 0.25
     assert aapl["news_count"] == 3

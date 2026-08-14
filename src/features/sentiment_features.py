@@ -5,11 +5,14 @@ def aggregate_sentiment(
     sentiment_df: pd.DataFrame,
 ) -> pd.DataFrame:
     """
-    Aggregate article-level sentiment by asset.
+    Aggregate article-level sentiment by asset, exchange,
+    and prediction timestamp.
 
     Expected columns:
         asset
+        exchange
         published_at
+        prediction_timestamp
         sentiment_score
         positive_probability
         negative_probability
@@ -19,6 +22,8 @@ def aggregate_sentiment(
         return pd.DataFrame(
             columns=[
                 "asset",
+                "exchange",
+                "prediction_timestamp",
                 "sentiment_mean",
                 "sentiment_std",
                 "news_count",
@@ -29,7 +34,13 @@ def aggregate_sentiment(
 
     aggregated = (
         sentiment_df
-        .groupby("asset")
+        .groupby(
+            [
+                "asset",
+                "exchange",
+                "prediction_timestamp",
+            ]
+        )
         .agg(
             sentiment_mean=("sentiment_score", "mean"),
             sentiment_std=("sentiment_score", "std"),
@@ -46,7 +57,6 @@ def aggregate_sentiment(
         .reset_index()
     )
 
-    # If an asset has only one article, standard deviation is NaN.
     aggregated["sentiment_std"] = (
         aggregated["sentiment_std"].fillna(0.0)
     )
