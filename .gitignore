@@ -1,0 +1,47 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Packaging / build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+
+# Test and coverage outputs
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# IDE/editor settings
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Project-specific data / generated outputs
+artifacts/
+# Keep tracked raw data intentionally if needed, so do not ignore data/ unless required.
+# Uncomment if you do not want generated data tracked:
+# data/interim/
+# data/processed/
+
+# Logs
+*.log
