@@ -1,0 +1,8 @@
+asset,exchange,published_at,source,headline,text,url,score,comments
+TCS,NSE,2026-08-10 09:40:00,Reddit,Strong TCS demand,"People are seeing strong demand for TCS services.",https://reddit.example/1,25,6
+TCS,NSE,2026-08-10 10:05:00,Reddit,TCS looks strong,"TCS looks strong after the recent results.",https://reddit.example/2,40,10
+TCS,NSE,2026-08-10 10:20:00,Reddit,TCS revenue discussion,"Users discuss the reported 20 percent revenue increase.",https://reddit.example/3,80,25
+TCS,NSE,2026-08-10 10:50:00,Reddit,TCS concerns,"Some users are concerned about TCS valuation.",https://reddit.example/4,30,12
+TCS,NSE,2026-08-10 11:10:00,Reddit,TCS expansion discussion,"Users discuss TCS expansion into new markets.",https://reddit.example/5,55,18
+RELIANCE,NSE,2026-08-10 09:50:00,Reddit,Reliance optimism,"Users are optimistic about Reliance.",https://reddit.example/6,35,8
+RELIANCE,NSE,2026-08-10 10:30:00,Reddit,Reliance concerns,"Some users discuss concerns about Reliance.",https://reddit.example/7,20,5

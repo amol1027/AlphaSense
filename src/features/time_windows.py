@@ -30,14 +30,27 @@ def filter_news_for_prediction(
     prediction_timestamp: datetime,
 ):
     """
-    Return only news articles available at prediction time.
+    Return news articles available at prediction time.
+    """
+
+    return filter_information_for_prediction(
+        articles,
+        prediction_timestamp,
+    )
+
+def filter_information_for_prediction(
+    items,
+    prediction_timestamp: datetime,
+):
+    """
+    Return information that was available at prediction time.
     """
 
     return [
-        article
-        for article in articles
+        item
+        for item in items
         if is_information_available(
-            article.published_at,
+            item.published_at,
             prediction_timestamp,
         )
     ]

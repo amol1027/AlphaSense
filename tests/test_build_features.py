@@ -5,8 +5,9 @@ from src.features.build_features import build_hourly_features
 
 def test_build_hourly_features():
     result = build_hourly_features(
-        "data/raw/market_sample.csv",
-        "data/raw/news_sample.csv",
+    "data/raw/market_sample.csv",
+    "data/raw/news_sample.csv",
+    "data/raw/reddit_sample.csv",
     )
 
     tcs = result[
@@ -35,6 +36,7 @@ def test_invalid_final_session_window_is_excluded():
     result = build_hourly_features(
         "data/raw/market_sample.csv",
         "data/raw/news_sample.csv",
+        "data/raw/reddit_sample.csv",
     )
 
     invalid_rows = result[
@@ -43,3 +45,29 @@ def test_invalid_final_session_window_is_excluded():
     ]
 
     assert len(invalid_rows) == 0
+
+def test_reddit_features_are_integrated():
+
+    result = build_hourly_features(
+        "data/raw/market_sample.csv",
+        "data/raw/news_sample.csv",
+        "data/raw/reddit_sample.csv",
+    )
+
+    tcs = result[
+        (result["asset"] == "TCS")
+        & (result["exchange"] == "NSE")
+        & (
+            result["prediction_timestamp"]
+            == pd.Timestamp(
+                "2026-08-10 10:15:00"
+            )
+        )
+    ].iloc[0]
+
+    # Only Reddit posts published by 10:15
+    # should be included.
+    assert tcs["reddit_count"] == 2
+
+    # The 10:20 Reddit post must NOT appear.
+    assert tcs["reddit_count"] != 3
