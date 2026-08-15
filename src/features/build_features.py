@@ -12,7 +12,7 @@ from src.ingestion.reddit_loader import load_reddit
 from src.sentiment.dummy import DummySentimentProvider
 from src.features.trading_calendar import (
     TradingCalendar,
-    WeekdayTradingCalendar,
+    load_default_nse_bse_calendar,
 )
 
 
@@ -34,7 +34,7 @@ def build_hourly_features(
     calendar = (
     calendar
     if calendar is not None
-    else WeekdayTradingCalendar() )
+    else load_default_nse_bse_calendar())
 
     # --------------------------------------------------
     # 1. Load market data

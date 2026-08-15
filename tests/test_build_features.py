@@ -110,3 +110,24 @@ def test_reddit_features_are_integrated():
 
     # The 10:20 Reddit post must NOT appear.
     assert tcs["reddit_count"] != 3
+
+def test_default_calendar_excludes_official_holiday():
+    result = build_hourly_features(
+        "data/raw/market_holiday_sample.csv",
+        "data/raw/news_sample.csv",
+        "data/raw/reddit_sample.csv",
+    )
+
+    holiday_rows = result[
+        result["prediction_timestamp"].dt.date
+        == date(2026, 1, 15)
+    ]
+
+    normal_day_rows = result[
+        result["prediction_timestamp"].dt.date
+        == date(2026, 1, 16)
+    ]
+
+    assert len(holiday_rows) == 0
+
+    assert len(normal_day_rows) > 0
