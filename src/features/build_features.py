@@ -10,12 +10,17 @@ from src.features.time_windows import (
 from src.ingestion.loader import load_news
 from src.ingestion.reddit_loader import load_reddit
 from src.sentiment.dummy import DummySentimentProvider
+from src.features.trading_calendar import (
+    TradingCalendar,
+    WeekdayTradingCalendar,
+)
 
 
 def build_hourly_features(
     market_path: str,
     news_path: str,
     reddit_path: str,
+    calendar: TradingCalendar | None = None,
 ) -> pd.DataFrame:
     """
     Build hourly market + news + Reddit features
@@ -26,6 +31,10 @@ def build_hourly_features(
     Only information available at or before the
     prediction timestamp is used.
     """
+    calendar = (
+    calendar
+    if calendar is not None
+    else WeekdayTradingCalendar() )
 
     # --------------------------------------------------
     # 1. Load market data
@@ -71,7 +80,12 @@ def build_hourly_features(
     prediction_timestamps = (
         prediction_timestamps[
             prediction_timestamps["timestamp"].apply(
-                is_valid_prediction_timestamp
+                lambda timestamp: (
+                    is_valid_prediction_timestamp(
+                        timestamp,
+                        calendar,
+                    )
+                )
             )
         ]
         .reset_index(drop=True)
@@ -171,6 +185,9 @@ def build_hourly_features(
                 ]
             )
         )
+        sentiment_features["prediction_timestamp"] = pd.to_datetime(
+        sentiment_features["prediction_timestamp"]
+    )
 
     else:
 
@@ -265,6 +282,7 @@ def build_hourly_features(
                 ]
             )
         )
+        reddit_features["prediction_timestamp"] = pd.to_datetime(reddit_features["prediction_timestamp"])
 
     else:
 

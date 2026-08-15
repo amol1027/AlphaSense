@@ -1,37 +1,66 @@
-from datetime import datetime, time, timedelta
+from datetime import datetime, timedelta
+
+from src.features.market_time import (
+    MARKET_CLOSE,
+    is_normal_market_time,
+    to_ist,
+)
+from src.features.trading_calendar import (
+    TradingCalendar,
+    WeekdayTradingCalendar,
+)
 
 
-SESSION_START = time(9, 15)
-SESSION_END = time(15, 30)
-
-
-def is_within_session(timestamp: datetime) -> bool:
+def is_within_session(
+    timestamp: datetime,
+    calendar: TradingCalendar | None = None,
+) -> bool:
     """
-    Return True when timestamp falls inside the regular
-    NSE/BSE equity trading session.
-
-    This initial Phase 0 implementation uses a simplified
-    weekday session model. Exchange holidays will be handled
-    by a proper market calendar later.
+    Return True when the timestamp falls inside the
+    normal NSE/BSE continuous equity session and the
+    date is a trading day.
     """
 
-    if timestamp.weekday() >= 5:
+    calendar = (
+        calendar
+        if calendar is not None
+        else WeekdayTradingCalendar()
+    )
+
+    timestamp = to_ist(timestamp)
+
+    if not calendar.is_trading_day(
+        timestamp.date()
+    ):
         return False
 
-    current_time = timestamp.time()
-
-    return SESSION_START <= current_time <= SESSION_END
+    return is_normal_market_time(timestamp)
 
 
 def is_valid_prediction_timestamp(
     prediction_timestamp: datetime,
+    calendar: TradingCalendar | None = None,
 ) -> bool:
     """
-    Return True when a full one-hour prediction window
-    fits inside the regular trading session.
+    Return True when a complete one-hour prediction
+    window fits inside the normal NSE/BSE session
+    on a valid trading day.
     """
 
-    if not is_within_session(prediction_timestamp):
+    calendar = (
+        calendar
+        if calendar is not None
+        else WeekdayTradingCalendar()
+    )
+
+    prediction_timestamp = to_ist(
+        prediction_timestamp
+    )
+
+    if not is_within_session(
+        prediction_timestamp,
+        calendar,
+    ):
         return False
 
     window_end = (
@@ -39,4 +68,7 @@ def is_valid_prediction_timestamp(
         + timedelta(hours=1)
     )
 
-    return window_end.time() <= SESSION_END
+    return (
+        window_end.time()
+        <= MARKET_CLOSE
+    )

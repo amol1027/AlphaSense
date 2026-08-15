@@ -1,7 +1,46 @@
 import pandas as pd
 
 from src.features.build_features import build_hourly_features
+from datetime import date
 
+from src.features.trading_calendar import (
+    WeekdayTradingCalendar,
+)
+
+
+class HolidayCalendar(WeekdayTradingCalendar):
+    def __init__(self, holidays):
+        self.holidays = set(holidays)
+
+    def is_trading_day(self, trading_date):
+        if trading_date in self.holidays:
+            return False
+
+        return super().is_trading_day(
+            trading_date
+        )
+
+
+def test_build_features_respects_holiday_calendar():
+    calendar = HolidayCalendar(
+        {
+            date(2026, 8, 10),
+        }
+    )
+
+    result = build_hourly_features(
+        "data/raw/market_sample.csv",
+        "data/raw/news_sample.csv",
+        "data/raw/reddit_sample.csv",
+        calendar=calendar,
+    )
+
+    holiday_rows = result[
+        result["prediction_timestamp"].dt.date
+        == date(2026, 8, 10)
+    ]
+
+    assert len(holiday_rows) == 0
 
 def test_build_hourly_features():
     result = build_hourly_features(

@@ -1,10 +1,61 @@
 from datetime import datetime
-
+from datetime import date
+from src.features.trading_calendar import (
+    WeekdayTradingCalendar,)
 from src.features.session_windows import (
     is_valid_prediction_timestamp,
-    is_within_session,
-)
+    is_within_session,)
 
+class HolidayCalendar(WeekdayTradingCalendar):
+    def __init__(self, holidays):
+        self.holidays = set(holidays)
+
+    def is_trading_day(self, trading_date):
+        if trading_date in self.holidays:
+            return False
+
+        return super().is_trading_day(
+            trading_date
+        )
+def test_holiday_is_not_valid_prediction_day():
+    calendar = HolidayCalendar(
+        {
+            date(2026, 8, 10),
+        }
+    )
+
+    timestamp = datetime(
+        2026,
+        8,
+        10,
+        10,
+        15,
+    )
+
+    assert not is_valid_prediction_timestamp(
+        timestamp,
+        calendar,
+    )
+
+def test_non_holiday_weekday_remains_valid():
+    calendar = HolidayCalendar(
+        {
+            date(2026, 8, 10),
+        }
+    )
+
+    timestamp = datetime(
+        2026,
+        8,
+        11,
+        10,
+        15,
+    )
+
+    assert is_valid_prediction_timestamp(
+        timestamp,
+        calendar,
+    )
 
 def test_timestamp_inside_session():
     timestamp = datetime(

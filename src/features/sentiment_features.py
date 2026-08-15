@@ -31,6 +31,8 @@ def aggregate_sentiment(
                 "negative_ratio",
             ]
         )
+        sentiment_features["prediction_timestamp"] = pd.to_datetime(
+        sentiment_features["prediction_timestamp"])
 
     aggregated = (
         sentiment_df
