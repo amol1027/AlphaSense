@@ -51,3 +51,25 @@ def test_reddit_cutoff():
     assert pd.Timestamp(
         "2026-08-10 10:20:00"
     ).to_pydatetime() not in timestamps
+
+def test_load_reddit_normalizes_timestamp_to_utc(tmp_path):
+    path = tmp_path / "reddit.csv"
+
+    pd.DataFrame(
+        {
+            "asset": ["TCS"],
+            "exchange": ["NSE"],
+            "published_at": ["2026-08-10 09:20:00"],
+            "source": ["reddit"],
+            "headline": ["Test"],
+            "text": ["Test post"],
+            "url": ["https://reddit.com/test"],
+            "score": [10],
+            "comments": [2],
+        }
+    ).to_csv(path, index=False)
+
+    result = load_reddit(path)
+
+    assert result[0].published_at.tzinfo is not None
+    assert result[0].published_at.utcoffset() is not None

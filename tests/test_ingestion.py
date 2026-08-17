@@ -40,3 +40,23 @@ def test_load_market_data():
     assert df.iloc[0]["timestamp"] == pd.Timestamp(
         "2026-08-10 09:15:00"
     )
+
+def test_load_news_normalizes_timestamp_to_utc(tmp_path):
+    path = tmp_path / "news.csv"
+
+    pd.DataFrame(
+        {
+            "asset": ["TCS"],
+            "exchange": ["NSE"],
+            "published_at": ["2026-08-10 09:20:00"],
+            "source": ["test"],
+            "headline": ["Test"],
+            "text": ["Test article"],
+            "url": ["https://example.com"],
+        }
+    ).to_csv(path, index=False)
+
+    result = load_news(path)
+
+    assert result[0].published_at.tzinfo is not None
+    assert result[0].published_at.utcoffset() is not None

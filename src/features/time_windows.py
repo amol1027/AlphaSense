@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-
+import pandas as pd
 
 def get_prediction_window(
     prediction_timestamp: datetime,
@@ -21,10 +21,38 @@ def is_information_available(
 ) -> bool:
     """
     Return True if information was available at prediction time.
+
+    Timestamps are normalized to UTC before comparison.
     """
 
-    return information_timestamp <= prediction_timestamp
+    information_timestamp = pd.Timestamp(
+        information_timestamp
+    )
 
+    prediction_timestamp = pd.Timestamp(
+        prediction_timestamp
+    )
+
+    if information_timestamp.tzinfo is None:
+        information_timestamp = (
+            information_timestamp.tz_localize("UTC")
+        )
+    else:
+        information_timestamp = (
+            information_timestamp.tz_convert("UTC")
+        )
+
+    if prediction_timestamp.tzinfo is None:
+        prediction_timestamp = (
+            prediction_timestamp.tz_localize("UTC")
+        )
+    else:
+        prediction_timestamp = (
+            prediction_timestamp.tz_convert("UTC")
+        )
+
+    return information_timestamp <= prediction_timestamp
+    
 def filter_news_for_prediction(
     articles,
     prediction_timestamp: datetime,

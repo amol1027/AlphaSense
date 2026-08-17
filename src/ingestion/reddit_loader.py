@@ -31,10 +31,13 @@ def load_reddit(path: str) -> list[RedditPost]:
     posts = []
 
     for _, row in df.iterrows():
+        published_at = pd.to_datetime(
+        row["published_at"],
+        utc=True, )
         post = RedditPost(
             asset=row["asset"],
             exchange=row["exchange"],
-            published_at=row["published_at"],
+            published_at=published_at,
             source=row["source"],
             headline=row["headline"],
             text=row["text"],

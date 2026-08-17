@@ -21,6 +21,7 @@ URL = (
 )
 
 
+
 def search_instrument(symbol: str) -> None:
     response = requests.get(
         URL,
@@ -78,6 +79,7 @@ def search_instrument(symbol: str) -> None:
             ),
         )
         print()
+
 
 
 def main():
