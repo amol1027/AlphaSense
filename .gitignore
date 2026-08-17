@@ -20,6 +20,7 @@ dist/
 # Test and coverage outputs
 .pytest_cache/
 .coverage
+.env
 .coverage.*
 htmlcov/
 
@@ -36,6 +37,7 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
+
 # Project-specific data / generated outputs
 artifacts/
 # Keep tracked raw data intentionally if needed, so do not ignore data/ unless required.
@@ -45,3 +47,5 @@ artifacts/
 
 # Logs
 *.log
+
+
