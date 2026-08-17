@@ -193,3 +193,144 @@ def test_empty_exchange_is_rejected(tmp_path):
             to_date=date(2026, 8, 10),
             output_path=tmp_path / "market.csv",
         )
+
+def test_multiple_date_chunks_are_combined(
+    monkeypatch,
+    tmp_path,
+):
+    first_chunk = pd.DataFrame(
+        {
+            "timestamp": pd.to_datetime(
+                [
+                    "2026-08-01 09:15",
+                    "2026-08-01 09:30",
+                ]
+            ),
+            "open": [100, 101],
+            "high": [102, 103],
+            "low": [99, 100],
+            "close": [101, 102],
+            "volume": [1000, 1200],
+        }
+    )
+
+    second_chunk = pd.DataFrame(
+        {
+            "timestamp": pd.to_datetime(
+                [
+                    "2026-08-02 09:15",
+                    "2026-08-02 09:30",
+                ]
+            ),
+            "open": [102, 103],
+            "high": [104, 105],
+            "low": [101, 102],
+            "close": [103, 104],
+            "volume": [1300, 1400],
+        }
+    )
+
+    calls = []
+
+    def mock_fetch(**kwargs):
+        calls.append(kwargs)
+
+        if len(calls) == 1:
+            return first_chunk
+
+        return second_chunk
+
+    monkeypatch.setattr(
+        "src.ingestion.market.downloader.fetch_historical_candles",
+        mock_fetch,
+    )
+
+    result = download_market_data(
+        instrument_key="NSE_EQ|TEST",
+        asset="TCS",
+        exchange="NSE",
+        from_date=date(2026, 8, 1),
+        to_date=date(2026, 8, 2),
+        output_path=tmp_path / "market.csv",
+        max_days_per_request=1,
+    )
+
+    assert len(calls) == 2
+    assert len(result) == 4
+
+    assert result[
+        "timestamp"
+    ].is_monotonic_increasing
+
+    assert set(result["asset"]) == {"TCS"}
+    assert set(result["exchange"]) == {"NSE"}
+
+def test_duplicate_boundary_rows_are_removed(
+    monkeypatch,
+    tmp_path,
+):
+    first_chunk = pd.DataFrame(
+        {
+            "timestamp": pd.to_datetime(
+                [
+                    "2026-08-01 09:15",
+                    "2026-08-01 09:30",
+                ]
+            ),
+            "open": [100, 101],
+            "high": [102, 103],
+            "low": [99, 100],
+            "close": [101, 102],
+            "volume": [1000, 1200],
+        }
+    )
+
+    second_chunk = pd.DataFrame(
+        {
+            "timestamp": pd.to_datetime(
+                [
+                    "2026-08-01 09:30",
+                    "2026-08-01 09:45",
+                ]
+            ),
+            "open": [101, 102],
+            "high": [103, 104],
+            "low": [100, 101],
+            "close": [102, 103],
+            "volume": [1200, 1300],
+        }
+    )
+
+    calls = []
+
+    def mock_fetch(**kwargs):
+        calls.append(kwargs)
+
+        if len(calls) == 1:
+            return first_chunk
+
+        return second_chunk
+
+    monkeypatch.setattr(
+        "src.ingestion.market.downloader.fetch_historical_candles",
+        mock_fetch,
+    )
+
+    result = download_market_data(
+        instrument_key="NSE_EQ|TEST",
+        asset="TCS",
+        exchange="NSE",
+        from_date=date(2026, 8, 1),
+        to_date=date(2026, 8, 2),
+        output_path=tmp_path / "market.csv",
+        max_days_per_request=1,
+    )
+
+    assert len(result) == 3
+
+    assert (
+        result["timestamp"]
+        .duplicated()
+        .sum()
+        == 0
+    )

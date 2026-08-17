@@ -21,8 +21,8 @@ INSTRUMENT_KEY = (
     "NSE_EQ|INE467B01029"
 )
 
-FROM_DATE = date(2026, 8, 10)
-TO_DATE = date(2026, 8, 10)
+FROM_DATE = date(2026, 7, 1)
+TO_DATE = date(2026, 7, 31)
 
 
 url = (
