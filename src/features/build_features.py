@@ -9,7 +9,12 @@ from src.features.time_windows import (
 )
 from src.ingestion.loader import load_news
 from src.ingestion.reddit_loader import load_reddit
-from src.sentiment.dummy import DummySentimentProvider
+from src.sentiment.finbert import (
+    FinBERTSentimentProvider,
+)
+from src.sentiment.news_preparation import (
+    prepare_news_for_sentiment,
+)
 from src.features.trading_calendar import (
     TradingCalendar,
     load_default_nse_bse_calendar,
@@ -32,9 +37,10 @@ def build_hourly_features(
     prediction timestamp is used.
     """
     calendar = (
-    calendar
-    if calendar is not None
-    else load_default_nse_bse_calendar())
+        calendar
+        if calendar is not None
+        else load_default_nse_bse_calendar()
+    )
 
     # --------------------------------------------------
     # 1. Load market data
@@ -43,7 +49,7 @@ def build_hourly_features(
     market_df = pd.read_csv(market_path)
 
     market_df["timestamp"] = pd.to_datetime(
-        market_df["timestamp"]
+        market_df["timestamp"],
     )
 
     market_df = market_df.sort_values(
@@ -58,9 +64,7 @@ def build_hourly_features(
     # 2. Add next-hour targets
     # --------------------------------------------------
 
-    market_df = add_next_hour_target(
-        market_df
-    )
+    market_df = add_next_hour_target(market_df)
 
     # --------------------------------------------------
     # 3. Determine valid prediction timestamps
@@ -97,104 +101,103 @@ def build_hourly_features(
 
     articles = load_news(news_path)
 
-    reddit_posts = load_reddit(
-        reddit_path
-    )
-
-    sentiment_provider = (
-        DummySentimentProvider()
-    )
+    reddit_posts = load_reddit(reddit_path)
 
     # --------------------------------------------------
     # 5. Build news sentiment records
     # --------------------------------------------------
 
-    sentiment_records = []
+    prepared_articles = prepare_news_for_sentiment(articles)
 
-    for _, prediction in (
-        prediction_timestamps.iterrows()
-    ):
+    sentiment_provider = FinBERTSentimentProvider()
 
-        prediction_timestamp = (
-            prediction["timestamp"]
-        )
+    article_sentiments = []
 
-        eligible_articles = (
-            filter_information_for_prediction(
-                articles,
-                prediction_timestamp.to_pydatetime(),
-            )
-        )
-
-        eligible_articles = [
-            article
-            for article in eligible_articles
-            if (
-                article.asset
-                == prediction["asset"]
-                and article.exchange
-                == prediction["exchange"]
-            )
+    if prepared_articles:
+        texts = [
+            article.text
+            for article in prepared_articles
         ]
 
-        for article in eligible_articles:
+        sentiments = sentiment_provider.predict_batch(texts)
 
-            result = sentiment_provider.predict(
-                article.text
+        article_sentiments = [
+            {
+                "asset": article.asset,
+                "exchange": article.exchange,
+                "published_at": article.published_at,
+                "sentiment_score": sentiment.sentiment_score,
+                "positive_probability": sentiment.positive_probability,
+                "negative_probability": sentiment.negative_probability,
+            }
+            for article, sentiment in zip(prepared_articles, sentiments)
+        ]
+
+    sentiment_rows = []
+
+    for _, prediction in prediction_timestamps.iterrows():
+
+        prediction_timestamp = pd.Timestamp(
+        prediction["timestamp"]
+    )
+
+        for article in article_sentiments:
+
+            if (
+            article["asset"] != prediction["asset"]
+            or article["exchange"] != prediction["exchange"]
+        ):
+                continue
+
+            article_published_at = pd.Timestamp(
+            article["published_at"]
+        )
+
+            if article_published_at.tzinfo is not None:
+                article_published_at = (
+                article_published_at.tz_localize(None)
             )
 
-            sentiment_records.append(
+            if prediction_timestamp.tzinfo is not None:
+                prediction_timestamp = (
+                prediction_timestamp.tz_localize(None)
+            )
+
+            if article_published_at <= prediction_timestamp:
+                sentiment_rows.append(
                 {
-                    "asset": article.asset,
-                    "exchange": article.exchange,
-                    "published_at": (
-                        article.published_at
-                    ),
+                    **article,
                     "prediction_timestamp": (
                         prediction_timestamp
                     ),
-                    "positive_probability": (
-                        result.positive_probability
-                    ),
-                    "negative_probability": (
-                        result.negative_probability
-                    ),
-                    "sentiment_score": (
-                        result.sentiment_score
-                    ),
                 }
             )
-
-    sentiment_df = pd.DataFrame(
-        sentiment_records
-    )
+    sentiment_df = pd.DataFrame(sentiment_rows)
 
     if sentiment_df.empty:
 
-        sentiment_features = (
-            pd.DataFrame(
-                columns=[
-                    "asset",
-                    "exchange",
-                    "prediction_timestamp",
-                    "sentiment_mean",
-                    "sentiment_std",
-                    "news_count",
-                    "positive_ratio",
-                    "negative_ratio",
-                ]
-            )
+        sentiment_features = pd.DataFrame(
+            columns=[
+                "asset",
+                "exchange",
+                "prediction_timestamp",
+                "sentiment_mean",
+                "sentiment_std",
+                "news_count",
+                "positive_ratio",
+                "negative_ratio",
+            ]
         )
+
         sentiment_features["prediction_timestamp"] = pd.to_datetime(
-        sentiment_features["prediction_timestamp"]
-    )
+            sentiment_features["prediction_timestamp"]
+        )
 
     else:
 
-        sentiment_features = (
-            aggregate_sentiment(
-                sentiment_df
-            )
+        sentiment_features = aggregate_sentiment(sentiment_df)
+        sentiment_features["prediction_timestamp"] = pd.to_datetime(
+            sentiment_features["prediction_timestamp"]
         )
 
     # --------------------------------------------------
@@ -203,19 +206,13 @@ def build_hourly_features(
 
     reddit_records = []
 
-    for _, prediction in (
-        prediction_timestamps.iterrows()
-    ):
+    for _, prediction in prediction_timestamps.iterrows():
 
-        prediction_timestamp = (
-            prediction["timestamp"]
-        )
+        prediction_timestamp = prediction["timestamp"]
 
-        eligible_posts = (
-            filter_information_for_prediction(
-                reddit_posts,
-                prediction_timestamp.to_pydatetime(),
-            )
+        eligible_posts = filter_information_for_prediction(
+            reddit_posts,
+            prediction_timestamp.to_pydatetime(),
         )
 
         eligible_posts = [
@@ -230,44 +227,28 @@ def build_hourly_features(
         ]
 
         for post in eligible_posts:
-
-            result = sentiment_provider.predict(
-                post.text
-            )
+            result = sentiment_provider.predict(post.text)
 
             reddit_records.append(
                 {
                     "asset": post.asset,
                     "exchange": post.exchange,
-                    "published_at": (
-                        post.published_at
-                    ),
-                    "prediction_timestamp": (
-                        prediction_timestamp
-                    ),
-                    "positive_probability": (
-                        result.positive_probability
-                    ),
-                    "negative_probability": (
-                        result.negative_probability
-                    ),
-                    "sentiment_score": (
-                        result.sentiment_score
-                    ),
+                    "published_at": post.published_at,
+                    "prediction_timestamp": prediction_timestamp,
+                    "positive_probability": result.positive_probability,
+                    "negative_probability": result.negative_probability,
+                    "sentiment_score": result.sentiment_score,
                     "score": post.score,
                     "comments": post.comments,
                 }
             )
 
-    reddit_df = pd.DataFrame(
-        reddit_records
-    )
+    reddit_df = pd.DataFrame(reddit_records)
 
     if reddit_df.empty:
 
-        reddit_features = (
-            pd.DataFrame(
-                columns=[
+        reddit_features = pd.DataFrame(
+            columns=[
                     "asset",
                     "exchange",
                     "prediction_timestamp",
@@ -279,17 +260,17 @@ def build_hourly_features(
                     "reddit_score_mean",
                     "reddit_comments_mean",
                     "reddit_engagement_mean",
-                ]
-            )
+            ]
         )
-        reddit_features["prediction_timestamp"] = pd.to_datetime(reddit_features["prediction_timestamp"])
+        reddit_features["prediction_timestamp"] = pd.to_datetime(
+            reddit_features["prediction_timestamp"]
+        )
 
     else:
 
-        reddit_features = (
-            aggregate_reddit(
-                reddit_df
-            )
+        reddit_features = aggregate_reddit(reddit_df)
+        reddit_features["prediction_timestamp"] = pd.to_datetime(
+            reddit_features["prediction_timestamp"]
         )
 
     # --------------------------------------------------
