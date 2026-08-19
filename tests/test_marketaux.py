@@ -56,6 +56,7 @@ def test_marketaux_fetch_news(monkeypatch):
     }
 
     class FakeResponse:
+        status_code = 200
         def raise_for_status(self):
             pass
 
@@ -93,4 +94,53 @@ def test_marketaux_fetch_news(monkeypatch):
     )
     assert article.published_at.tzinfo == (
         timezone.utc
+    )
+
+def test_marketaux_historical_dates_are_date_only(
+    monkeypatch,
+):
+    captured = {}
+
+    class FakeResponse:
+        status_code = 200
+
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {"data": []}
+
+    def fake_get(*args, **kwargs):
+        captured.update(kwargs)
+        return FakeResponse()
+
+    monkeypatch.setattr(
+        requests,
+        "get",
+        fake_get,
+    )
+
+    client = MarketauxClient(
+        api_token="test-token"
+    )
+
+    client.fetch_news(
+        "TCS",
+        limit=1,
+        published_after=(
+            "2026-07-01T00:00:00+00:00"
+        ),
+        published_before=(
+            "2026-07-08T00:00:00+00:00"
+        ),
+    )
+
+    params = captured["params"]
+
+    assert params["published_after"] == (
+        "2026-07-01"
+    )
+
+    assert params["published_before"] == (
+        "2026-07-08"
     )

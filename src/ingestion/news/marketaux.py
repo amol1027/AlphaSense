@@ -70,14 +70,10 @@ class MarketauxClient:
         }
 
         if published_after:
-            params["published_after"] = (
-                published_after
-            )
+            params["published_after"] = (published_after[:10])
 
         if published_before:
-            params["published_before"] = (
-                published_before
-            )
+            params["published_before"] = (published_before[:10])
 
         response = requests.get(
             MARKETAUX_URL,
@@ -85,6 +81,12 @@ class MarketauxClient:
             timeout=self.timeout,
         )
 
+        if response.status_code >= 400:
+           print(
+        "Marketaux response:",
+        response.status_code,
+        response.text[:2000],
+    )
         response.raise_for_status()
 
         payload = response.json()
