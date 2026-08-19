@@ -1,5 +1,4 @@
-from datetime import timezone
-
+from datetime import datetime, timezone
 import requests
 
 from src.ingestion.news.gdelt import (
@@ -218,3 +217,68 @@ def test_gdelt_retries_rate_limit(
 
     assert len(articles) == 1
     assert articles[0].headline == "TCS news"
+
+def test_gdelt_historical_date_parameters(
+    monkeypatch,
+):
+    captured = {}
+
+    payload = {
+        "articles": []
+    }
+
+    class FakeResponse:
+        status_code = 200
+
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return payload
+
+    def fake_get(*args, **kwargs):
+        captured.update(kwargs)
+        return FakeResponse()
+
+    monkeypatch.setattr(
+        requests,
+        "get",
+        fake_get,
+    )
+
+    client = GDELTNewsClient()
+
+    client.fetch_news(
+        "TCS",
+        max_records=25,
+        start_datetime=datetime(
+            2026,
+            7,
+            1,
+            0,
+            0,
+            0,
+            tzinfo=timezone.utc,
+        ),
+        end_datetime=datetime(
+            2026,
+            8,
+            10,
+            23,
+            59,
+            59,
+            tzinfo=timezone.utc,
+        ),
+    )
+
+    params = captured["params"]
+
+    assert params["maxrecords"] == 25
+
+    assert params["startdatetime"] == (
+        "20260701000000"
+    )
+
+    assert params["enddatetime"] == (
+        "20260810235959"
+    )
