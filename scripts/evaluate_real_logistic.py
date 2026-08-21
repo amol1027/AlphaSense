@@ -19,12 +19,17 @@ MARKET_PATH = (
 )
 
 NEWS_PATH = (
-    "data/raw/news_sample.csv"
+    "data/raw/news/research_news.csv"
 )
 
 REDDIT_PATH = (
     "data/raw/reddit_sample.csv"
 )
+
+NEWS_SENTIMENT_PATH = (
+    "data/processed/research_news_sentiment.csv"
+)
+
 
 TRAIN_END = pd.Timestamp(
     "2026-07-25",
@@ -39,14 +44,26 @@ VALIDATION_END = pd.Timestamp(
 
 def print_metrics(name, metrics):
     print(f"\n{name}")
-    print("  Accuracy:", metrics.accuracy)
+    print(
+        "  Accuracy:",
+        metrics.accuracy,
+    )
     print(
         "  Balanced accuracy:",
         metrics.balanced_accuracy,
     )
-    print("  Precision:", metrics.precision)
-    print("  Recall:", metrics.recall)
-    print("  Samples:", metrics.sample_count)
+    print(
+        "  Precision:",
+        metrics.precision,
+    )
+    print(
+        "  Recall:",
+        metrics.recall,
+    )
+    print(
+        "  Samples:",
+        metrics.sample_count,
+    )
     print(
         "  Confusion matrix:",
         metrics.confusion_matrix,
@@ -54,12 +71,17 @@ def print_metrics(name, metrics):
 
 
 def main():
-    print("Building real feature dataset...")
+    print(
+        "Building real feature dataset..."
+    )
 
     features = build_hourly_features(
         MARKET_PATH,
         NEWS_PATH,
         REDDIT_PATH,
+        news_sentiment_path=(
+            NEWS_SENTIMENT_PATH
+        ),
     )
 
     print(
@@ -75,10 +97,18 @@ def main():
 
     print(
         "Prediction range:",
-        features["prediction_timestamp"].min(),
+        features[
+            "prediction_timestamp"
+        ].min(),
         "→",
-        features["prediction_timestamp"].max(),
+        features[
+            "prediction_timestamp"
+        ].max(),
     )
+
+    # ----------------------------------------------
+    # Chronological split
+    # ----------------------------------------------
 
     datasets = build_train_validation_test(
         features,
@@ -100,32 +130,48 @@ def main():
         len(datasets.test.X),
     )
 
-    print("\nFitting Logistic Regression...")
+    # ----------------------------------------------
+    # Fit model
+    # ----------------------------------------------
+
+    print(
+        "\nFitting Logistic Regression..."
+    )
 
     model = fit_logistic_model(
         datasets.train.X,
         datasets.train.y,
     )
 
-    validation_predictions = model.predict(
-        datasets.validation.X
+    validation_predictions = (
+        model.predict(
+            datasets.validation.X
+        )
     )
 
-    test_predictions = model.predict(
-        datasets.test.X
+    test_predictions = (
+        model.predict(
+            datasets.test.X
+        )
     )
 
-    validation_metrics = evaluate_classifier(
-        datasets.validation.y,
-        validation_predictions,
+    validation_metrics = (
+        evaluate_classifier(
+            datasets.validation.y,
+            validation_predictions,
+        )
     )
 
-    test_metrics = evaluate_classifier(
-        datasets.test.y,
-        test_predictions,
+    test_metrics = (
+        evaluate_classifier(
+            datasets.test.y,
+            test_predictions,
+        )
     )
 
-    print("\n=== REAL DATA LOGISTIC REGRESSION ===")
+    print(
+        "\n=== REAL DATA LOGISTIC REGRESSION ==="
+    )
 
     print_metrics(
         "Validation",
@@ -136,25 +182,57 @@ def main():
         "Test",
         test_metrics,
     )
-    test_results = datasets.test.X.copy()
 
-    test_results["asset"] = features.loc[
-        datasets.test.X.index,
-        "asset",
-    ]
+    # ----------------------------------------------
+    # Build correctly aligned test results
+    # ----------------------------------------------
+    #
+    # IMPORTANT:
+    # build_modeling_dataset() resets the dataframe
+    # index. Therefore we cannot recover asset labels
+    # using datasets.test.X.index against the original
+    # features dataframe.
+    #
+    # Instead, split the original feature dataframe
+    # first using the same chronological boundaries.
+    # ----------------------------------------------
 
-    test_results["actual"] = (
-        datasets.test.y
+    test_features = features[
+        features["prediction_timestamp"]
+        >= VALIDATION_END
+    ].copy()
+
+    # Drop rows that do not have a target, exactly
+    # as build_modeling_dataset() does.
+    test_features = test_features.dropna(
+        subset=["target_direction"]
+    ).reset_index(drop=True)
+
+    if len(test_features) != len(
+        datasets.test.X
+    ):
+        raise RuntimeError(
+            "Test feature alignment mismatch: "
+            f"features={len(test_features)}, "
+            f"model_test={len(datasets.test.X)}"
+        )
+
+    test_results = pd.DataFrame(
+        {
+            "asset": test_features[
+                "asset"
+            ].to_numpy(),
+            "actual": datasets.test.y.to_numpy(),
+            "prediction": test_predictions,
+        }
     )
 
-    test_results["prediction"] = (
-        test_predictions
+    print(
+        "\n=== TEST RESULTS BY ASSET ==="
     )
 
-    print("\n=== TEST RESULTS BY ASSET ===")
-
-    for asset, group in test_results.groupby(
-        "asset"
+    for asset, group in (
+        test_results.groupby("asset")
     ):
         metrics = evaluate_classifier(
             group["actual"],

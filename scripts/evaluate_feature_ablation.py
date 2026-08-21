@@ -15,7 +15,7 @@ from src.modeling.logistic import fit_logistic_model
 
 
 MARKET_PATH = "data/raw/market/research_market_15m.csv"
-NEWS_PATH = "data/raw/news_sample.csv"
+NEWS_PATH = "data/raw/news/research_news.csv"
 REDDIT_PATH = "data/raw/reddit_sample.csv"
 
 TRAIN_END = pd.Timestamp(
@@ -110,10 +110,12 @@ def main():
     print("Building feature dataset...")
 
     features = build_hourly_features(
-        MARKET_PATH,
-        NEWS_PATH,
-        REDDIT_PATH,
-    )
+    MARKET_PATH,
+    NEWS_PATH,
+    REDDIT_PATH,
+    news_sentiment_path=(
+        "data/processed/research_news_sentiment.csv"
+    ),)
 
     print(
         f"Feature rows: {len(features)}"

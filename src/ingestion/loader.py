@@ -40,7 +40,8 @@ def load_news(path: str) -> list[NewsArticle]:
             published_at=published_at,
             source=row["source"],
             headline=row["headline"],
-            text=row["text"],
+            text=(""if pd.isna(row["text"])
+                    else str(row["text"])),
             url=row["url"],
         )
 
