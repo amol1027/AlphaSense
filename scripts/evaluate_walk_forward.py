@@ -17,6 +17,10 @@ from src.modeling.evaluation import (
 from src.modeling.logistic import (
     fit_logistic_model,
 )
+from src.modeling.tree_models import (
+    fit_random_forest,
+    fit_hist_gradient_boosting,
+)
 
 
 MARKET_PATH = (
@@ -36,6 +40,10 @@ NEWS_SENTIMENT_PATH = (
 )
 
 
+# ==========================================================
+# FEATURE SETS
+# ==========================================================
+
 MARKET_FEATURES = [
     "open",
     "high",
@@ -43,6 +51,17 @@ MARKET_FEATURES = [
     "close",
     "volume",
 ]
+
+
+ENGINEERED_MARKET_FEATURES = [
+    "return_15m",
+    "return_30m",
+    "return_1h",
+    "high_low_range",
+    "close_open_return",
+    "volume_change",
+]
+
 
 NEWS_FEATURES = [
     "sentiment_mean",
@@ -52,60 +71,110 @@ NEWS_FEATURES = [
     "negative_ratio",
 ]
 
-REDDIT_FEATURES = [
-    "reddit_sentiment_mean",
-    "reddit_sentiment_std",
-    "reddit_count",
-    "reddit_positive_ratio",
-    "reddit_negative_ratio",
-    "reddit_score_mean",
-    "reddit_comments_mean",
-    "reddit_engagement_mean",
-]
 
+MODEL_FEATURE_SETS = {
+    "Market only": (
+        MARKET_FEATURES
+    ),
 
-EXPERIMENTS = {
-    "Market only": MARKET_FEATURES,
+    "Engineered Market": (
+        ENGINEERED_MARKET_FEATURES
+    ),
+
     "Market + News": (
         MARKET_FEATURES
         + NEWS_FEATURES
     ),
-    "Market + Reddit": (
-        MARKET_FEATURES
-        + REDDIT_FEATURES
-    ),
-    "Market + News + Reddit": (
-        MARKET_FEATURES
+
+    "Engineered Market + News": (
+        ENGINEERED_MARKET_FEATURES
         + NEWS_FEATURES
-        + REDDIT_FEATURES
     ),
 }
 
 
-# Each test period is one trading day.
-#
-# The model uses all observations before that day
-# for training and predicts that day's observations.
-#
-# We skip the earliest days so that the initial
-# training set is reasonably large.
+MODELS = {
+    "Logistic Regression": fit_logistic_model,
+    "Random Forest": fit_random_forest,
+    "HistGradientBoosting": (
+        fit_hist_gradient_boosting
+    ),
+}
+
+
 MIN_TRAIN_DAYS = 10
 
 
-def evaluate_period(
+# ==========================================================
+# DATA PREPARATION
+# ==========================================================
+
+def prepare_period_data(
     train_df: pd.DataFrame,
     test_df: pd.DataFrame,
     feature_columns: list[str],
 ):
+    """
+    Prepare one walk-forward period.
+
+    Rows without a target or selected feature values
+    are removed.
+
+    Filtering is performed independently for each
+    period so future information cannot influence
+    training.
+    """
+
+    required_columns = [
+        "target_direction"
+    ] + feature_columns
+
     train_df = train_df.dropna(
-        subset=["target_direction"]
-    ).reset_index(drop=True)
+        subset=required_columns
+    ).copy()
 
     test_df = test_df.dropna(
-        subset=["target_direction"]
-    ).reset_index(drop=True)
+        subset=required_columns
+    ).copy()
+
+    train_df = train_df.reset_index(
+        drop=True
+    )
+
+    test_df = test_df.reset_index(
+        drop=True
+    )
 
     if train_df.empty or test_df.empty:
+        return None, None
+
+    return train_df, test_df
+
+
+# ==========================================================
+# MODEL EVALUATION
+# ==========================================================
+
+def evaluate_model_period(
+    train_df: pd.DataFrame,
+    test_df: pd.DataFrame,
+    feature_columns: list[str],
+    model_name: str,
+):
+    """
+    Fit one model using only the historical training
+    period and evaluate it on the following test period.
+    """
+
+    train_df, test_df = (
+        prepare_period_data(
+            train_df,
+            test_df,
+            feature_columns,
+        )
+    )
+
+    if train_df is None:
         return None
 
     X_train = train_df[
@@ -124,7 +193,11 @@ def evaluate_period(
         "target_direction"
     ].copy()
 
-    model = fit_logistic_model(
+    fit_function = MODELS[
+        model_name
+    ]
+
+    model = fit_function(
         X_train,
         y_train,
     )
@@ -133,19 +206,74 @@ def evaluate_period(
         X_test
     )
 
-    metrics = evaluate_classifier(
+    return evaluate_classifier(
         y_test,
         predictions,
     )
 
-    return metrics
+
+def evaluate_majority_period(
+    train_df: pd.DataFrame,
+    test_df: pd.DataFrame,
+):
+    """
+    Evaluate a majority-class baseline.
+
+    The majority class is calculated exclusively
+    from historical training observations.
+    """
+
+    train_df = train_df.dropna(
+        subset=["target_direction"]
+    ).copy()
+
+    test_df = test_df.dropna(
+        subset=["target_direction"]
+    ).copy()
+
+    if train_df.empty or test_df.empty:
+        return None
+
+    y_train = train_df[
+        "target_direction"
+    ].astype(int)
+
+    y_test = test_df[
+        "target_direction"
+    ].astype(int)
+
+    majority_class = int(
+        y_train
+        .value_counts()
+        .idxmax()
+    )
+
+    predictions = pd.Series(
+        majority_class,
+        index=y_test.index,
+        dtype=int,
+    )
+
+    return evaluate_classifier(
+        y_test,
+        predictions,
+    )
 
 
-def run_walk_forward(
+# ==========================================================
+# WALK-FORWARD PERIODS
+# ==========================================================
+
+def get_walk_forward_periods(
     features: pd.DataFrame,
-    feature_columns: list[str],
     asset: str | None = None,
 ):
+    """
+    Construct expanding-window chronological periods.
+
+    Each test period represents one trading day.
+    """
+
     if asset is not None:
         data = features[
             features["asset"] == asset
@@ -166,7 +294,7 @@ def run_walk_forward(
         data["date"].unique()
     )
 
-    results = []
+    periods = []
 
     for index in range(
         MIN_TRAIN_DAYS,
@@ -188,14 +316,62 @@ def run_walk_forward(
             data["date"] == test_date
         ].copy()
 
-        metrics = evaluate_period(
+        periods.append(
+            (
+                test_date,
+                train_df,
+                test_df,
+            )
+        )
+
+    return periods
+
+
+# ==========================================================
+# WALK-FORWARD MODEL RUNNERS
+# ==========================================================
+
+def run_model_walk_forward(
+    features: pd.DataFrame,
+    feature_columns: list[str],
+    model_name: str,
+    asset: str | None = None,
+):
+    """
+    Run one model through all expanding-window
+    walk-forward periods.
+    """
+
+    periods = get_walk_forward_periods(
+        features,
+        asset=asset,
+    )
+
+    results = []
+
+    for (
+        test_date,
+        train_df,
+        test_df,
+    ) in periods:
+
+        metrics = evaluate_model_period(
             train_df,
             test_df,
             feature_columns,
+            model_name,
         )
 
         if metrics is None:
             continue
+
+        train_used, test_used = (
+            prepare_period_data(
+                train_df,
+                test_df,
+                feature_columns,
+            )
+        )
 
         results.append(
             {
@@ -205,12 +381,90 @@ def run_walk_forward(
                     else "ALL"
                 ),
                 "test_date": test_date,
+                "model": model_name,
                 "train_samples": len(
-                    train_df.dropna(
-                        subset=[
-                            "target_direction"
-                        ]
-                    )
+                    train_used
+                ),
+                "test_samples": len(
+                    test_used
+                ),
+                "accuracy": (
+                    metrics.accuracy
+                ),
+                "balanced_accuracy": (
+                    metrics.balanced_accuracy
+                ),
+                "precision": (
+                    metrics.precision
+                ),
+                "recall": (
+                    metrics.recall
+                ),
+            }
+        )
+
+    return pd.DataFrame(
+        results
+    )
+
+
+def run_majority_walk_forward(
+    features: pd.DataFrame,
+    asset: str | None = None,
+):
+    """
+    Run majority baseline over the exact same
+    chronological periods.
+    """
+
+    periods = get_walk_forward_periods(
+        features,
+        asset=asset,
+    )
+
+    results = []
+
+    for (
+        test_date,
+        train_df,
+        test_df,
+    ) in periods:
+
+        metrics = evaluate_majority_period(
+            train_df,
+            test_df,
+        )
+
+        if metrics is None:
+            continue
+
+        train_clean = train_df.dropna(
+            subset=["target_direction"]
+        )
+
+        majority_class = int(
+            train_clean[
+                "target_direction"
+            ]
+            .astype(int)
+            .value_counts()
+            .idxmax()
+        )
+
+        results.append(
+            {
+                "asset": (
+                    asset
+                    if asset is not None
+                    else "ALL"
+                ),
+                "test_date": test_date,
+                "model": "Majority baseline",
+                "majority_class": (
+                    majority_class
+                ),
+                "train_samples": len(
+                    train_clean
                 ),
                 "test_samples": (
                     metrics.sample_count
@@ -234,6 +488,10 @@ def run_walk_forward(
         results
     )
 
+
+# ==========================================================
+# SUMMARY
+# ==========================================================
 
 def summarize_results(
     results: pd.DataFrame,
@@ -277,51 +535,51 @@ def summarize_results(
     )
 
 
-def compare_news_to_market(
-    features: pd.DataFrame,
-    asset: str | None = None,
+def print_summary(
+    summary: pd.Series,
 ):
-    market = run_walk_forward(
-        features,
-        MARKET_FEATURES,
-        asset=asset,
+    print(
+        f"  Periods: "
+        f"{int(summary['periods'])}"
     )
 
-    news = run_walk_forward(
-        features,
-        MARKET_FEATURES + NEWS_FEATURES,
-        asset=asset,
+    print(
+        "  Mean accuracy:",
+        f"{summary['mean_accuracy']:.4f}",
     )
 
-    comparison = market.merge(
-        news,
-        on=["test_date"],
-        suffixes=(
-            "_market",
-            "_news",
-        ),
+    print(
+        "  Mean balanced accuracy:",
+        f"{summary['mean_balanced_accuracy']:.4f}",
     )
 
-    comparison["balanced_accuracy_delta"] = (
-        comparison[
-            "balanced_accuracy_news"
-        ]
-        - comparison[
-            "balanced_accuracy_market"
-        ]
+    print(
+        "  Median balanced accuracy:",
+        f"{summary['median_balanced_accuracy']:.4f}",
     )
 
-    return comparison[
-        [
-            "test_date",
-            "balanced_accuracy_market",
-            "balanced_accuracy_news",
-            "balanced_accuracy_delta",
-        ]
-    ]
+    print(
+        "  Std balanced accuracy:",
+        f"{summary['std_balanced_accuracy']:.4f}",
+    )
 
+    print(
+        "  Mean precision:",
+        f"{summary['mean_precision']:.4f}",
+    )
+
+    print(
+        "  Mean recall:",
+        f"{summary['mean_recall']:.4f}",
+    )
+
+
+# ==========================================================
+# MAIN
+# ==========================================================
 
 def main():
+
     print(
         "Building real feature dataset..."
     )
@@ -362,6 +620,18 @@ def main():
         ].dt.date.nunique(),
     )
 
+    print(
+        "\nEngineered market features:"
+    )
+
+    print(
+        features[
+            ENGINEERED_MARKET_FEATURES
+        ]
+        .describe()
+        .to_string()
+    )
+
     all_summary_rows = []
 
     assets = [
@@ -369,6 +639,10 @@ def main():
         "RELIANCE",
         "TCS",
     ]
+
+    # ==================================================
+    # Walk-forward comparison
+    # ==================================================
 
     for asset in assets:
 
@@ -382,74 +656,107 @@ def main():
             "\n"
             + "=" * 70
         )
+
         print(
             f"WALK-FORWARD: {asset_label}"
         )
+
         print(
             "=" * 70
         )
 
-        for (
-            experiment,
-            feature_columns,
-        ) in EXPERIMENTS.items():
+        # ----------------------------------------------
+        # Majority baseline
+        # ----------------------------------------------
 
-            print(
-                f"\nRunning: {experiment}"
-            )
+        print(
+            "\n"
+            "Running: Majority baseline"
+        )
 
-            results = run_walk_forward(
+        majority_results = (
+            run_majority_walk_forward(
                 features,
-                feature_columns,
                 asset=asset,
             )
+        )
 
-            summary = summarize_results(
-                results
+        majority_summary = (
+            summarize_results(
+                majority_results
             )
+        )
+
+        print_summary(
+            majority_summary
+        )
+
+        all_summary_rows.append(
+            {
+                "asset": asset_label,
+                "feature_set": (
+                    "Baseline"
+                ),
+                "model": (
+                    "Majority baseline"
+                ),
+                **majority_summary.to_dict(),
+            }
+        )
+
+        # ----------------------------------------------
+        # Model comparison
+        # ----------------------------------------------
+
+        for (
+            feature_set_name,
+            feature_columns,
+        ) in MODEL_FEATURE_SETS.items():
 
             print(
-                f"  Periods: "
-                f"{int(summary['periods'])}"
+                "\n"
+                f"FEATURE SET: "
+                f"{feature_set_name}"
             )
 
-            print(
-                "  Mean accuracy:",
-                f"{summary['mean_accuracy']:.4f}",
-            )
+            for model_name in MODELS:
 
-            print(
-                "  Mean balanced accuracy:",
-                f"{summary['mean_balanced_accuracy']:.4f}",
-            )
+                print(
+                    f"\nRunning: "
+                    f"{model_name}"
+                )
 
-            print(
-                "  Median balanced accuracy:",
-                f"{summary['median_balanced_accuracy']:.4f}",
-            )
+                results = (
+                    run_model_walk_forward(
+                        features,
+                        feature_columns,
+                        model_name,
+                        asset=asset,
+                    )
+                )
 
-            print(
-                "  Std balanced accuracy:",
-                f"{summary['std_balanced_accuracy']:.4f}",
-            )
+                summary = summarize_results(
+                    results
+                )
 
-            print(
-                "  Mean precision:",
-                f"{summary['mean_precision']:.4f}",
-            )
+                print_summary(
+                    summary
+                )
 
-            print(
-                "  Mean recall:",
-                f"{summary['mean_recall']:.4f}",
-            )
+                all_summary_rows.append(
+                    {
+                        "asset": asset_label,
+                        "feature_set": (
+                            feature_set_name
+                        ),
+                        "model": model_name,
+                        **summary.to_dict(),
+                    }
+                )
 
-            all_summary_rows.append(
-                {
-                    "asset": asset_label,
-                    "experiment": experiment,
-                    **summary.to_dict(),
-                }
-            )
+    # ==================================================
+    # Final summary
+    # ==================================================
 
     summary_df = pd.DataFrame(
         all_summary_rows
@@ -459,72 +766,11 @@ def main():
         "\n\n"
         + "=" * 70
     )
-    print(
-        "NEWS VS MARKET-ONLY BY TEST PERIOD"
-    )
-    print(
-        "=" * 70
-    )
-
-    for asset in [
-        None,
-        "RELIANCE",
-        "TCS",
-    ]:
-
-        label = (
-            asset
-            if asset is not None
-            else "ALL ASSETS"
-        )
-
-        comparison = compare_news_to_market(
-            features,
-            asset=asset,
-        )
-
-        print(
-            f"\n{label}"
-        )
-
-        print(
-            comparison.to_string(
-                index=False,
-                float_format=lambda x: f"{x:.4f}",
-            )
-        )
-
-        wins = (
-            comparison[
-                "balanced_accuracy_delta"
-            ] > 0
-        ).sum()
-
-        losses = (
-            comparison[
-                "balanced_accuracy_delta"
-            ] < 0
-        ).sum()
-
-        ties = (
-            comparison[
-                "balanced_accuracy_delta"
-            ] == 0
-        ).sum()
-
-        print(
-            f"\nNews wins: {wins}"
-            f" | losses: {losses}"
-            f" | ties: {ties}"
-        )
 
     print(
-        "\n\n"
-        + "=" * 70
+        "FINAL MODEL COMPARISON"
     )
-    print(
-        "FINAL WALK-FORWARD SUMMARY"
-    )
+
     print(
         "=" * 70
     )

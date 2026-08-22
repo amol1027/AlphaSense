@@ -676,6 +676,8 @@ AlphaSense/
 ├── data/
 │   ├── raw/
 │   │   ├── market/
+│   │   │   ├── tcs_15m.csv
+│   │   │   ├── reliance_15m.csv
 │   │   │   └── research_market_15m.csv
 │   │   ├── news/
 │   │   │   └── research_news.csv
@@ -689,12 +691,31 @@ AlphaSense/
 │       └── nse_bse_holidays_2026.json
 │
 ├── scripts/
-│   ├── collect_historical_news.py
-│   ├── process_historical_news_sentiment.py
-│   ├── evaluate_feature_ablation.py
-│   ├── evaluate_asset_ablation.py
-│   ├── evaluate_real_logistic.py
-│   └── evaluate_walk_forward.py
+│   │
+│   ├── Data collection
+│   │   ├── download_market_data.py
+│   │   ├── collect_historical_news.py
+│   │   └── build_research_market.py
+│   │
+│   ├── Sentiment processing
+│   │   └── process_historical_news_sentiment.py
+│   │
+│   ├── Evaluation
+│   │   ├── evaluate_real_logistic.py
+│   │   ├── evaluate_real_baseline.py
+│   │   ├── evaluate_feature_ablation.py
+│   │   ├── evaluate_asset_ablation.py
+│   │   ├── evaluate_logistic_by_asset.py
+│   │   ├── evaluate_logistic_per_asset.py
+│   │   ├── evaluate_baseline.py
+│   │   └── evaluate_walk_forward.py
+│   │
+│   └── Diagnostics
+│       ├── inspect_real_targets.py
+│       ├── check_news_overlap.py
+│       ├── check_upstox_news_api.py
+│       ├── resolve_instruments.py
+│       └── test_historical_request.py
 │
 ├── src/
 │   ├── features/
@@ -723,6 +744,9 @@ AlphaSense/
 │       ├── dataset.py
 │       ├── splits.py
 │       ├── logistic.py
+│       ├── baseline.py
+│       ├── baseline_runner.py
+│       ├── benchmark.py
 │       └── evaluation.py
 │
 ├── tests/
@@ -733,6 +757,283 @@ AlphaSense/
 ```
 
 The repository structure will continue to evolve as modeling and production-data work progresses.
+
+---
+
+# Scripts
+
+All scripts must be run from the project root directory.
+
+```powershell
+python scripts/<script_name>.py
+```
+
+---
+
+## Data Collection
+
+### `download_market_data.py`
+
+Downloads 15-minute OHLCV candles for TCS and RELIANCE from Upstox over a
+configured date range and saves them as per-asset CSV files.
+
+```text
+Output:
+  data/raw/market/tcs_15m.csv
+  data/raw/market/reliance_15m.csv
+```
+
+Requires a valid Upstox API key in `.env`.
+
+---
+
+### `build_research_market.py`
+
+Merges the per-asset market CSVs into a single combined file sorted by asset
+and timestamp. Run this after `download_market_data.py`.
+
+```text
+Input:
+  data/raw/market/tcs_15m.csv
+  data/raw/market/reliance_15m.csv
+
+Output:
+  data/raw/market/research_market_15m.csv
+```
+
+---
+
+### `collect_historical_news.py`
+
+Collects historical financial news for TCS and RELIANCE over a configured date
+range using both Marketaux and GDELT as sources. Deduplicates by URL and
+headline before writing the output.
+
+GDELT windows that hit the 250-record limit are automatically bisected to
+avoid silent data loss.
+
+```text
+Output:
+  data/raw/news/research_news.csv
+```
+
+Requires a Marketaux API key in `.env`. GDELT is free but rate-limited
+(5-second sleep between requests).
+
+---
+
+## Sentiment Processing
+
+### `process_historical_news_sentiment.py`
+
+Loads the raw news CSV, prepares article text for FinBERT (body preferred,
+fallback to headline), runs FinBERT sentiment inference, and writes
+article-level sentiment scores.
+
+```text
+Input:
+  data/raw/news/research_news.csv
+
+Output:
+  data/processed/research_news_sentiment.csv
+
+Columns written:
+  asset, exchange, published_at, source, text,
+  positive_probability, neutral_probability,
+  negative_probability, sentiment_score
+```
+
+This script is slow (FinBERT is run locally). Run it once and reuse
+`research_news_sentiment.csv` in all subsequent evaluation scripts.
+
+---
+
+## Evaluation
+
+All evaluation scripts use the same data paths:
+
+```text
+Market:    data/raw/market/research_market_15m.csv
+News:      data/raw/news/research_news.csv
+Sentiment: data/processed/research_news_sentiment.csv
+Reddit:    data/raw/reddit_sample.csv
+```
+
+---
+
+### `evaluate_walk_forward.py`
+
+**Primary evaluation script.** Runs an expanding-window walk-forward experiment
+across all assets and per asset (RELIANCE, TCS) for four experiment groups:
+
+```text
+Market only
+Market + News
+Market + Reddit
+Market + News + Reddit
+```
+
+Each test period is one trading day. The model trains on all prior days and
+predicts that day's observations. The minimum initial training window is
+10 trading days.
+
+Also runs a news-vs-market per-period comparison and reports win/loss/tie
+counts.
+
+```powershell
+python scripts/evaluate_walk_forward.py
+```
+
+---
+
+### `evaluate_feature_ablation.py`
+
+Runs the same four experiment groups using a fixed chronological
+train/validation/test split instead of walk-forward.
+
+```text
+Train end:      2026-07-25
+Validation end: 2026-08-02
+```
+
+Reports validation and test accuracy, balanced accuracy, precision, and recall
+for each experiment.
+
+```powershell
+python scripts/evaluate_feature_ablation.py
+```
+
+---
+
+### `evaluate_asset_ablation.py`
+
+Runs the feature ablation evaluation broken down by individual asset using the
+same fixed train/validation/test split as `evaluate_feature_ablation.py`.
+
+```powershell
+python scripts/evaluate_asset_ablation.py
+```
+
+---
+
+### `evaluate_real_logistic.py`
+
+Fits and evaluates a Logistic Regression model on the real research dataset
+using a fixed chronological split. Reports validation and test metrics for
+market-only and market-plus-news feature sets.
+
+```powershell
+python scripts/evaluate_real_logistic.py
+```
+
+---
+
+### `evaluate_real_baseline.py`
+
+Evaluates the majority-class baseline on the real dataset using a fixed
+chronological split. Use this to establish the floor accuracy that any model
+must beat.
+
+```powershell
+python scripts/evaluate_real_baseline.py
+```
+
+---
+
+### `evaluate_logistic_by_asset.py`
+
+Fits and evaluates a Logistic Regression model separately for each asset.
+Allows per-asset performance to be compared directly.
+
+```powershell
+python scripts/evaluate_logistic_by_asset.py
+```
+
+---
+
+### `evaluate_logistic_per_asset.py`
+
+Variant of asset-level evaluation with additional per-period breakdown output.
+
+```powershell
+python scripts/evaluate_logistic_per_asset.py
+```
+
+---
+
+### `evaluate_baseline.py`
+
+Evaluates the majority-class baseline and random baseline on development sample
+data. Useful for sanity-checking the baseline infrastructure independently of
+the real dataset.
+
+```powershell
+python scripts/evaluate_baseline.py
+```
+
+---
+
+## Diagnostics
+
+### `inspect_real_targets.py`
+
+Loads the per-asset 15-minute market CSVs, computes next-hour targets, and
+prints class distribution and a sample of target rows. Use this to verify that
+the target generation is working correctly before running model evaluation.
+
+```powershell
+python scripts/inspect_real_targets.py
+```
+
+---
+
+### `check_news_overlap.py`
+
+Fetches a small sample of recent articles from both Marketaux and Upstox for
+TCS and RELIANCE, deduplicates them, and prints the overlap statistics. Use
+this to assess how much duplicate coverage exists across news providers.
+
+Requires API keys for both providers in `.env`.
+
+```powershell
+python scripts/check_news_overlap.py
+```
+
+---
+
+### `check_upstox_news_api.py`
+
+Sanity-checks the Upstox news API connection and prints a small sample of
+recently fetched articles. Use this to confirm that the API key and client
+behavior are working correctly.
+
+```powershell
+python scripts/check_upstox_news_api.py
+```
+
+---
+
+### `resolve_instruments.py`
+
+Looks up Upstox instrument keys for a configured list of symbols. Use this
+when adding new assets to confirm the correct `instrument_key` before
+updating `download_market_data.py`.
+
+```powershell
+python scripts/resolve_instruments.py
+```
+
+---
+
+### `test_historical_request.py`
+
+Sends a single historical candle request to the Upstox API and prints the raw
+response. Use this to debug API authentication or date-range issues in
+isolation before running the full downloader.
+
+```powershell
+python scripts/test_historical_request.py
+```
 
 ---
 

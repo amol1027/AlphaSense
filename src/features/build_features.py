@@ -1,5 +1,8 @@
 import pandas as pd
 
+from src.features.market_features import (
+    add_normalized_market_features,
+)
 from src.features.reddit_features import aggregate_reddit
 from src.features.sentiment_features import aggregate_sentiment
 from src.features.session_windows import (
@@ -8,7 +11,6 @@ from src.features.session_windows import (
 from src.features.targets import add_next_hour_target
 from src.features.time_windows import (
     filter_information_for_prediction,
-    filter_news_for_prediction,
 )
 from src.ingestion.loader import load_news
 from src.ingestion.reddit_loader import load_reddit
@@ -48,8 +50,8 @@ def build_hourly_features(
     news_sentiment_path: str | None = None,
 ) -> pd.DataFrame:
     """
-    Build market, news sentiment, Reddit sentiment,
-    and next-hour target features.
+    Build market, normalized market, news sentiment,
+    Reddit sentiment, and next-hour target features.
 
     Historical news sentiment can be supplied through
     news_sentiment_path. When supplied, precomputed
@@ -62,7 +64,9 @@ def build_hourly_features(
 
     and:
 
-        news published_at <= prediction_timestamp
+        prediction_timestamp - 1 hour
+        <= news published_at
+        <= prediction_timestamp
 
     News exchange metadata is deliberately not used
     when determining eligibility.
@@ -95,7 +99,15 @@ def build_hourly_features(
     ).reset_index(drop=True)
 
     # ==================================================
-    # 2. Add next-hour target
+    # 2. Add normalized market features
+    # ==================================================
+
+    market_df = add_normalized_market_features(
+        market_df
+    )
+
+    # ==================================================
+    # 3. Add next-hour target
     # ==================================================
 
     market_df = add_next_hour_target(
@@ -103,7 +115,7 @@ def build_hourly_features(
     )
 
     # ==================================================
-    # 3. Determine valid prediction timestamps
+    # 4. Determine valid prediction timestamps
     # ==================================================
 
     prediction_timestamps = (
@@ -132,15 +144,10 @@ def build_hourly_features(
     )
 
     # ==================================================
-    # 4. Prepare news sentiment
+    # 5. Prepare news sentiment
     # ==================================================
 
     if news_sentiment_path is not None:
-
-        # ----------------------------------------------
-        # Historical path:
-        # use precomputed FinBERT scores.
-        # ----------------------------------------------
 
         sentiment_source = pd.read_csv(
             news_sentiment_path
@@ -188,11 +195,6 @@ def build_hourly_features(
         )
 
     else:
-
-        # ----------------------------------------------
-        # Sample/live path:
-        # load raw news and run FinBERT.
-        # ----------------------------------------------
 
         articles = load_news(
             news_path
@@ -246,7 +248,7 @@ def build_hourly_features(
             ]
 
     # ==================================================
-    # 5. Associate news with predictions
+    # 6. Associate news with predictions
     # ==================================================
 
     sentiment_rows = []
@@ -265,21 +267,30 @@ def build_hourly_features(
             )
         )
 
+        window_start_utc = (
+            prediction_timestamp_utc
+            - pd.Timedelta(hours=1)
+        )
+
         for article in article_sentiments:
 
-            # News is associated with the same asset.
-            #
-            # We intentionally do NOT compare news
-            # exchange metadata here.
-
-            if (article["asset"]!= prediction["asset"]):
+            if (
+                article["asset"]
+                != prediction["asset"]
+            ):
                 continue
 
-            article_published_at = (_normalize_utc_timestamp(article["published_at"]))
+            article_published_at = (
+                _normalize_utc_timestamp(
+                    article["published_at"]
+                )
+            )
 
-            window_start_utc = (prediction_timestamp_utc - pd.Timedelta(hours=1))
-
-            if (window_start_utc<= article_published_at<= prediction_timestamp_utc):
+            if (
+                window_start_utc
+                <= article_published_at
+                <= prediction_timestamp_utc
+            ):
                 sentiment_rows.append(
                     {
                         "asset": article["asset"],
@@ -310,7 +321,7 @@ def build_hourly_features(
     )
 
     # ==================================================
-    # 6. Aggregate news sentiment
+    # 7. Aggregate news sentiment
     # ==================================================
 
     if sentiment_df.empty:
@@ -336,8 +347,6 @@ def build_hourly_features(
             )
         )
 
-    # Normalize the timestamp type after aggregation.
-
     sentiment_features[
         "prediction_timestamp"
     ] = pd.to_datetime(
@@ -347,7 +356,7 @@ def build_hourly_features(
     )
 
     # ==================================================
-    # 7. Load Reddit
+    # 8. Load Reddit
     # ==================================================
 
     reddit_posts = load_reddit(
@@ -423,7 +432,7 @@ def build_hourly_features(
     )
 
     # ==================================================
-    # 8. Aggregate Reddit features
+    # 9. Aggregate Reddit features
     # ==================================================
 
     if reddit_df.empty:
@@ -459,7 +468,7 @@ def build_hourly_features(
     )
 
     # ==================================================
-    # 9. Build base feature dataframe
+    # 10. Build base feature dataframe
     # ==================================================
 
     features = market_df.rename(
@@ -477,21 +486,36 @@ def build_hourly_features(
     )
 
     # ==================================================
-    # 10. Keep only valid prediction rows
+    # 11. Keep only valid prediction rows
     # ==================================================
 
+    valid_predictions = (
+        prediction_timestamps.rename(
+            columns={
+                "timestamp": (
+                    "prediction_timestamp"
+                )
+            }
+        )
+        .copy()
+    )
+
+    valid_predictions[
+        "prediction_timestamp"
+    ] = pd.to_datetime(
+        valid_predictions[
+            "prediction_timestamp"
+        ]
+    )
+
     valid_keys = pd.MultiIndex.from_frame(
-        prediction_timestamps[
+        valid_predictions[
             [
                 "asset",
                 "exchange",
-                "timestamp",
+                "prediction_timestamp",
             ]
-        ].rename(
-            columns={
-                "timestamp": "prediction_timestamp"
-            }
-        )
+        ]
     )
 
     feature_keys = pd.MultiIndex.from_frame(
@@ -513,7 +537,7 @@ def build_hourly_features(
     )
 
     # ==================================================
-    # 11. Merge news features
+    # 12. Merge news features
     # ==================================================
 
     features = features.merge(
@@ -527,7 +551,7 @@ def build_hourly_features(
     )
 
     # ==================================================
-    # 12. Merge Reddit features
+    # 13. Merge Reddit features
     # ==================================================
 
     features = features.merge(
@@ -541,7 +565,7 @@ def build_hourly_features(
     )
 
     # ==================================================
-    # 13. Fill missing feature values
+    # 14. Fill missing feature values
     # ==================================================
 
     feature_columns = [
