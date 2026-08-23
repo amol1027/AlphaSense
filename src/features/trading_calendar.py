@@ -1,6 +1,9 @@
 import json
-from datetime import date
+from datetime import date, time
 from pathlib import Path
+
+
+SessionWindow = tuple[time, time]
 
 
 class TradingCalendar:
@@ -12,6 +15,12 @@ class TradingCalendar:
         self,
         trading_date: date,
     ) -> bool:
+        raise NotImplementedError
+
+    def session_windows(
+        self,
+        trading_date: date,
+    ) -> list[SessionWindow]:
         raise NotImplementedError
 
 
@@ -31,6 +40,22 @@ class WeekdayTradingCalendar(
     ) -> bool:
         return trading_date.weekday() < 5
 
+    def session_windows(
+        self,
+        trading_date: date,
+    ) -> list[SessionWindow]:
+        if not self.is_trading_day(
+            trading_date
+        ):
+            return []
+
+        return [
+            (
+                time(9, 15),
+                time(15, 30),
+            )
+        ]
+
 
 class NSEBSETradingCalendar(
     TradingCalendar
@@ -38,12 +63,17 @@ class NSEBSETradingCalendar(
     """
     Calendar for NSE/BSE normal equity trading.
 
-    Holiday dates are supplied explicitly.
+    Holiday dates and special session windows
+    are supplied explicitly.
     """
 
     def __init__(
         self,
         holidays: set[date] | None = None,
+        special_sessions: (
+            dict[date, list[SessionWindow]]
+            | None
+        ) = None,
     ):
         self.holidays = (
             holidays
@@ -51,10 +81,19 @@ class NSEBSETradingCalendar(
             else set()
         )
 
+        self.special_sessions = (
+            special_sessions
+            if special_sessions is not None
+            else {}
+        )
+
     def is_trading_day(
         self,
         trading_date: date,
     ) -> bool:
+
+        if trading_date in self.special_sessions:
+            return True
 
         if trading_date.weekday() >= 5:
             return False
@@ -63,6 +102,28 @@ class NSEBSETradingCalendar(
             return False
 
         return True
+
+    def session_windows(
+        self,
+        trading_date: date,
+    ) -> list[SessionWindow]:
+
+        if trading_date in self.special_sessions:
+            return self.special_sessions[
+                trading_date
+            ]
+
+        if not self.is_trading_day(
+            trading_date
+        ):
+            return []
+
+        return [
+            (
+                time(9, 15),
+                time(15, 30),
+            )
+        ]
 
 
 def load_nse_bse_calendar(
@@ -86,9 +147,37 @@ def load_nse_bse_calendar(
         for value in data["holidays"]
     }
 
+    special_sessions = {}
+
+    for date_value, session_data in (
+        data.get(
+            "special_sessions",
+            {},
+        ).items()
+    ):
+        windows = []
+
+        for window in session_data["sessions"]:
+            windows.append(
+                (
+                    time.fromisoformat(
+                        window["open"]
+                    ),
+                    time.fromisoformat(
+                        window["close"]
+                    ),
+                )
+            )
+
+        special_sessions[
+            date.fromisoformat(date_value)
+        ] = windows
+
     return NSEBSETradingCalendar(
         holidays=holidays,
+        special_sessions=special_sessions,
     )
+
 
 DEFAULT_NSE_BSE_CALENDAR_PATH = (
     "data/reference/nse_bse_holidays_2026.json"

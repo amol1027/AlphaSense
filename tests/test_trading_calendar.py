@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, time
 from src.features.trading_calendar import (
     load_nse_bse_calendar,)
 from src.features.trading_calendar import (
@@ -101,3 +101,81 @@ def test_base_calendar_requires_implementation():
         assert True
     else:
         assert False
+
+def test_normal_session_windows():
+    calendar = NSEBSETradingCalendar()
+
+    assert calendar.session_windows(
+        date(2026, 8, 10)
+    ) == [
+        (
+            time(9, 15),
+            time(15, 30),
+        )
+    ]
+
+
+def test_special_weekend_session_is_trading_day():
+    calendar = NSEBSETradingCalendar(
+        special_sessions={
+            date(2026, 2, 1): [
+                (
+                    time(9, 15),
+                    time(15, 30),
+                )
+            ]
+        }
+    )
+
+    assert calendar.is_trading_day(
+        date(2026, 2, 1)
+    )
+
+
+def test_special_session_has_multiple_windows():
+    calendar = NSEBSETradingCalendar(
+        special_sessions={
+            date(2024, 3, 2): [
+                (
+                    time(9, 15),
+                    time(10, 0),
+                ),
+                (
+                    time(11, 30),
+                    time(12, 30),
+                ),
+            ]
+        }
+    )
+
+    assert calendar.session_windows(
+        date(2024, 3, 2)
+    ) == [
+        (
+            time(9, 15),
+            time(10, 0),
+        ),
+        (
+            time(11, 30),
+            time(12, 30),
+        ),
+    ]
+
+
+def test_loaded_special_session_windows():
+    calendar = load_nse_bse_calendar(
+        "data/reference/nse_bse_holidays_2024.json"
+    )
+
+    assert calendar.session_windows(
+        date(2024, 3, 2)
+    ) == [
+        (
+            time(9, 15),
+            time(10, 0),
+        ),
+        (
+            time(11, 30),
+            time(12, 30),
+        ),
+    ]
