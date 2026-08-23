@@ -83,3 +83,83 @@ def test_invalid_max_days():
             date(2026, 8, 10),
             max_days=0,
         )
+
+def test_split_date_range_by_month():
+    from src.ingestion.market.date_ranges import (
+        split_date_range_by_month,
+    )
+
+    result = split_date_range_by_month(
+        date(2024, 1, 15),
+        date(2024, 3, 10),
+    )
+
+    assert result == [
+        (
+            date(2024, 1, 15),
+            date(2024, 1, 31),
+        ),
+        (
+            date(2024, 2, 1),
+            date(2024, 2, 29),
+        ),
+        (
+            date(2024, 3, 1),
+            date(2024, 3, 10),
+        ),
+    ]
+
+
+def test_split_date_range_by_month_single_month():
+    from src.ingestion.market.date_ranges import (
+        split_date_range_by_month,
+    )
+
+    result = split_date_range_by_month(
+        date(2026, 8, 1),
+        date(2026, 8, 21),
+    )
+
+    assert result == [
+        (
+            date(2026, 8, 1),
+            date(2026, 8, 21),
+        )
+    ]
+
+
+def test_split_date_range_by_month_leap_year():
+    from src.ingestion.market.date_ranges import (
+        split_date_range_by_month,
+    )
+
+    result = split_date_range_by_month(
+        date(2024, 2, 1),
+        date(2024, 3, 1),
+    )
+
+    assert result == [
+        (
+            date(2024, 2, 1),
+            date(2024, 2, 29),
+        ),
+        (
+            date(2024, 3, 1),
+            date(2024, 3, 1),
+        ),
+    ]
+
+
+def test_split_date_range_by_month_invalid_range():
+    from src.ingestion.market.date_ranges import (
+        split_date_range_by_month,
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="to_date",
+    ):
+        split_date_range_by_month(
+            date(2026, 8, 11),
+            date(2026, 8, 10),
+        )

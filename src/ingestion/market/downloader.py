@@ -5,6 +5,7 @@ import pandas as pd
 
 from src.ingestion.market.date_ranges import (
     split_date_range,
+    split_date_range_by_month,
 )
 from src.ingestion.market.upstox import (
     fetch_historical_candles,
@@ -34,7 +35,7 @@ def download_market_data(
     to_date: date,
     output_path: str | Path,
     interval_minutes: int = 15,
-    max_days_per_request: int = 31,
+    max_days_per_request: int = 31
 ) -> pd.DataFrame:
     """
     Download historical market data in provider-safe
@@ -56,7 +57,13 @@ def download_market_data(
             "to_date must be greater than or equal to from_date."
         )
 
-    chunks = split_date_range(
+    if max_days_per_request == 31:
+        chunks = split_date_range_by_month(
+        from_date,
+        to_date,
+    )
+    else:
+        chunks = split_date_range(
         from_date,
         to_date,
         max_days=max_days_per_request,
