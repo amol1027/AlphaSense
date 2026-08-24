@@ -131,3 +131,44 @@ def test_default_calendar_excludes_official_holiday():
     assert len(holiday_rows) == 0
 
     assert len(normal_day_rows) > 0
+
+def test_news_cutoff_is_strictly_prediction_time():
+    result = build_hourly_features(
+        "data/raw/market_sample.csv",
+        "data/raw/news_sample.csv",
+        "data/raw/reddit_sample.csv",
+    )
+
+    tcs = result[
+        (result["asset"] == "TCS")
+        & (result["exchange"] == "NSE")
+        & (
+            result["prediction_timestamp"]
+            == pd.Timestamp("2026-08-10 10:15:00")
+        )
+    ].iloc[0]
+
+    # The existing fixture has two eligible news items
+    # at or before the prediction timestamp.
+    assert tcs["news_count"] == 2
+
+
+def test_future_news_does_not_leak_into_prediction():
+    result = build_hourly_features(
+        "data/raw/market_sample.csv",
+        "data/raw/news_sample.csv",
+        "data/raw/reddit_sample.csv",
+    )
+
+    tcs = result[
+        (result["asset"] == "TCS")
+        & (result["exchange"] == "NSE")
+        & (
+            result["prediction_timestamp"]
+            == pd.Timestamp("2026-08-10 10:15:00")
+        )
+    ].iloc[0]
+
+    # The fixture contains a news item after 10:15.
+    # It must not affect the prediction features.
+    assert tcs["news_count"] != 3

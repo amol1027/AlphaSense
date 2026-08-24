@@ -13,7 +13,9 @@ if str(PROJECT_ROOT) not in sys.path:
 from src.ingestion.news.marketaux import MarketauxClient
 from src.ingestion.news.gdelt import GDELTNewsClient
 from src.ingestion.schemas import NewsArticle
-
+from src.ingestion.news.dedup import (
+    deduplicate_news,
+)
 
 START_DATE = datetime(
     2026,
@@ -55,33 +57,6 @@ def article_to_row(article: NewsArticle) -> dict:
     }
 
 
-def deduplicate(
-    articles: list[NewsArticle],
-) -> list[NewsArticle]:
-    seen_urls = set()
-    seen_headlines = set()
-
-    unique = []
-
-    for article in articles:
-        url = str(article.url).strip()
-        headline = article.headline.strip().lower()
-
-        if url and url in seen_urls:
-            continue
-
-        if headline and headline in seen_headlines:
-            continue
-
-        if url:
-            seen_urls.add(url)
-
-        if headline:
-            seen_headlines.add(headline)
-
-        unique.append(article)
-
-    return unique
 
 
 def collect_marketaux(
@@ -280,9 +255,16 @@ def main():
         f"{len(all_articles)}"
     )
 
-    all_articles = deduplicate(
-        all_articles
-    )
+    deduplication_result = deduplicate_news(
+    all_articles
+)
+
+    all_articles = deduplication_result.articles
+
+    print(
+    f"Duplicates removed: "
+    f"{deduplication_result.duplicate_count}")
+    
     all_articles = [
     article
     for article in all_articles

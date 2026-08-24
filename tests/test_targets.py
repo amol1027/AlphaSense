@@ -127,3 +127,75 @@ def test_next_hour_target_with_15_minute_data():
     assert pd.isna(
         result.loc[1, "target_return"]
     )
+
+def test_target_uses_exactly_one_hour_later():
+    df = pd.DataFrame(
+        {
+            "asset": ["TCS"] * 5,
+            "exchange": ["NSE"] * 5,
+            "timestamp": pd.to_datetime(
+                [
+                    "2026-08-10 10:15:00",
+                    "2026-08-10 10:30:00",
+                    "2026-08-10 10:45:00",
+                    "2026-08-10 11:00:00",
+                    "2026-08-10 11:15:00",
+                ]
+            ),
+            "close": [
+                100,
+                101,
+                102,
+                103,
+                110,
+            ],
+        }
+    )
+
+    result = add_next_hour_target(df)
+
+    expected_return = (110 - 100) / 100
+
+    assert (
+        result.loc[0, "target_return"]
+        == expected_return
+    )
+
+    assert (
+        result.loc[0, "target_direction"]
+        == 1
+    )
+
+
+def test_target_does_not_use_intermediate_bar():
+    df = pd.DataFrame(
+        {
+            "asset": ["TCS"] * 5,
+            "exchange": ["NSE"] * 5,
+            "timestamp": pd.to_datetime(
+                [
+                    "2026-08-10 10:15:00",
+                    "2026-08-10 10:30:00",
+                    "2026-08-10 10:45:00",
+                    "2026-08-10 11:00:00",
+                    "2026-08-10 11:15:00",
+                ]
+            ),
+            "close": [
+                100,
+                200,
+                300,
+                400,
+                110,
+            ],
+        }
+    )
+
+    result = add_next_hour_target(df)
+
+    expected_return = (110 - 100) / 100
+
+    assert (
+        result.loc[0, "target_return"]
+        == expected_return
+    )

@@ -6,11 +6,11 @@ import pandas as pd
 MARKET_DIR = Path("data/raw/market")
 
 INPUTS = [
-    MARKET_DIR / "tcs_15m.csv",
-    MARKET_DIR / "reliance_15m.csv",
+    MARKET_DIR / "phase1_tcs_15m.csv",
+    MARKET_DIR / "phase1_reliance_15m.csv",
 ]
 
-OUTPUT = MARKET_DIR / "research_market_15m.csv"
+OUTPUT = MARKET_DIR / "phase1_research_market_15m.csv"
 
 
 def main():
