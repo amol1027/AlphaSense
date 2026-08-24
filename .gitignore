@@ -62,3 +62,4 @@ data/raw/market/phase1_tcs_15m.csv
 data/raw/market/phase1_boundary_test.csv
 data/raw/market/phase1_smoke_reliance.csv
 data/raw/market/phase1_smoke_tcs.csv
+data/processed/research_news_sentiment.csv
