@@ -8,7 +8,7 @@
 
 **Phase 0B — Modeling & Evaluation: IN PROGRESS**
 
-**Current test status: 190 passed, 1 warning**
+**Current test status: 208 passed, 1 warning**
 
 The project currently covers:
 
@@ -18,7 +18,8 @@ The project currently covers:
 * IST normalization
 * NSE/BSE session validation
 * Trading-calendar abstraction
-* 2026 holiday reference data
+* 2024–2026 NSE/BSE holiday reference data
+* Special-session calendar handling
 * Calendar-aware feature construction
 * Historical financial-news ingestion
 * FinBERT sentiment inference
@@ -187,6 +188,8 @@ TradingCalendar
 The production-oriented calendar loads holiday data from:
 
 ```text
+data/reference/nse_bse_holidays_2024.json
+data/reference/nse_bse_holidays_2025.json
 data/reference/nse_bse_holidays_2026.json
 ```
 
@@ -218,6 +221,44 @@ External data should first be converted to this canonical representation.
 
 ---
 
+# Phase 1 Market Data Validation
+
+The Phase 1 15-minute market dataset for RELIANCE and TCS has passed the
+market-data audit.
+
+```text
+RELIANCE: PASS
+TCS:      PASS
+
+Rows per asset:          16,322
+Observed sessions:         656
+Expected sessions:         656
+Missing 15m bars:             0
+Unexpected 15m bars:          0
+Duplicate timestamps:        0
+Misaligned timestamps:        0
+Weekend bars:                 0
+Holiday bars:                 0
+Invalid numeric values:       0
+OHLC violations:              0
+```
+
+Cross-asset coverage is identical:
+
+```text
+Common timestamps: 16,322
+RELIANCE-only:          0
+TCS-only:               0
+```
+
+The audit is implemented in `src/ingestion/market/audit.py` and can be run with:
+
+```powershell
+python -m scripts.audit_phase1_market
+```
+
+---
+
 # News Pipeline
 
 Historical research news is collected from available news providers and stored as raw articles.
@@ -235,6 +276,8 @@ The historical news range is:
 ```text
 2026-07-05 → 2026-08-10
 ```
+
+Historical collection now uses the canonical `deduplicate_news()` implementation from `src/ingestion/news/dedup.py` before downstream processing.
 
 Articles are deduplicated before being used downstream.
 
@@ -661,7 +704,7 @@ pytest
 Current result:
 
 ```text
-190 passed, 1 warning
+208 passed, 1 warning
 ```
 
 The warning currently comes from the tokenizer dependency used by the FinBERT stack and does not fail the test suite.
@@ -806,8 +849,9 @@ Output:
 ### `collect_historical_news.py`
 
 Collects historical financial news for TCS and RELIANCE over a configured date
-range using both Marketaux and GDELT as sources. Deduplicates by URL and
-headline before writing the output.
+range using both Marketaux and GDELT as sources. Uses the canonical
+`deduplicate_news()` implementation from `src/ingestion/news/dedup.py` before
+writing the output.
 
 GDELT windows that hit the 250-record limit are automatically bisected to
 avoid silent data loss.
@@ -1179,8 +1223,14 @@ STATUS: COMPLETE
 Phase 0B — Modeling & Evaluation
 STATUS: IN PROGRESS
 
+Phase 1 Market Data Validation
+STATUS: PASS
+
+Phase 1 News Collection
+STATUS: COMPLETE — audit pending
+
 Tests:
-190 passed, 1 warning
+208 passed, 1 warning
 
 Current research status:
 - Leakage-safe chronological evaluation is implemented.
@@ -1190,6 +1240,6 @@ Current research status:
 - Reddit features currently show no measurable improvement.
 
 Next:
-Normalize market features and establish
-majority / market / market + news baselines.
+Audit historical news quality, then process FinBERT sentiment and establish
+normalized market / market + news baselines.
 ```
