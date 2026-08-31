@@ -1,9 +1,11 @@
 from pathlib import Path
 import sys
 from datetime import datetime, timezone, timedelta
+import json
 import time
 
 import pandas as pd
+import requests
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
@@ -13,9 +15,8 @@ if str(PROJECT_ROOT) not in sys.path:
 from src.ingestion.news.marketaux import MarketauxClient
 from src.ingestion.news.gdelt import GDELTNewsClient
 from src.ingestion.schemas import NewsArticle
-from src.ingestion.news.dedup import (
-    deduplicate_news,
-)
+from src.ingestion.news.dedup import deduplicate_news
+
 
 START_DATE = datetime(
     2026,
@@ -44,6 +45,34 @@ OUTPUT_PATH = (
     / "research_news.csv"
 )
 
+TEMP_OUTPUT_PATH = (
+    PROJECT_ROOT
+    / "data"
+    / "raw"
+    / "news"
+    / "research_news_expanded.csv"
+)
+
+CHECKPOINT_PATH = (
+    PROJECT_ROOT
+    / "data"
+    / "raw"
+    / "news"
+    / "news_collection_checkpoint.json"
+)
+
+FAILED_WINDOWS_PATH = (
+    PROJECT_ROOT
+    / "data"
+    / "raw"
+    / "news"
+    / "news_failed_windows.json"
+)
+
+
+# ============================================================
+# Helpers
+# ============================================================
 
 def article_to_row(article: NewsArticle) -> dict:
     return {
@@ -57,238 +86,127 @@ def article_to_row(article: NewsArticle) -> dict:
     }
 
 
-
-
-def collect_marketaux(
-    client: MarketauxClient,
-    asset: str,
-) -> list[NewsArticle]:
-
-    print(f"\nMarketaux: {asset}")
-
-    articles = []
-
-    current = START_DATE
-
-    while current < END_DATE:
-        window_end = min(
-            current + timedelta(days=7),
-            END_DATE,
-        )
-
-        print(
-            "  Window:",
-            current.isoformat(),
-            "→",
-            window_end.isoformat(),
-        )
-
-        page = 1
-
-        while True:
-            batch = client.fetch_news(
-                asset=asset,
-                limit=50,
-                published_after=current.isoformat(),
-                published_before=window_end.isoformat(),
-                page=page,
-            )
-
-            print(
-                f"    page {page}: "
-                f"{len(batch)} articles"
-            )
-
-            articles.extend(batch)
-
-            if len(batch) < 50:
-                break
-
-            page += 1
-
-        current = window_end
-
-    return articles
-
-
-def collect_gdelt(
-    client: GDELTNewsClient,
-    asset: str,
-) -> list[NewsArticle]:
-    """
-    Collect GDELT articles in small historical windows.
-
-    Windows that hit the GDELT record limit are split
-    into smaller windows so we don't silently lose data.
-    """
-
-    print(f"\nGDELT: {asset}")
-
-    articles = []
-
-    def collect_window(
-        start: datetime,
-        end: datetime,
-    ) -> None:
-        print(
-            "  Window:",
-            start.isoformat(),
-            "→",
-            end.isoformat(),
-        )
-
-        time.sleep(5)
-
-        batch = client.fetch_news(
-            asset=asset,
-            max_records=250,
-            start_datetime=start,
-            end_datetime=end,
-        )
-
-        print(
-            f"    {len(batch)} articles"
-        )
-
-        if len(batch) < 250:
-            articles.extend(batch)
-            return
-
-        # Exactly 250 means the result may be truncated.
-        # Split the window before accepting the result.
-        duration = end - start
-
-        if duration <= timedelta(hours=1):
-            print(
-                "    WARNING: 250 articles in "
-                "a <=1 hour window; accepting "
-                "the capped result."
-            )
-            articles.extend(batch)
-            return
-
-        midpoint = start + (
-            duration / 2
-        )
-
-        print(
-            "    Hit 250-record limit; "
-            "splitting window."
-        )
-
-        collect_window(
-            start,
-            midpoint,
-        )
-
-        collect_window(
-            midpoint,
-            end,
-        )
-
-    current = START_DATE
-
-    while current < END_DATE:
-        window_end = min(
-            current + timedelta(days=1),
-            END_DATE,
-        )
-
-        try:
-            collect_window(
-                current,
-                window_end,
-            )
-        except Exception as exc:
-            print(
-                f"    Window failed: "
-                f"{type(exc).__name__}: {exc}"
-            )
-
-        current = window_end
-
-    return articles
-
-def main():
-    OUTPUT_PATH.parent.mkdir(
+def save_checkpoint(
+    completed_windows: set[str],
+) -> None:
+    CHECKPOINT_PATH.parent.mkdir(
         parents=True,
         exist_ok=True,
     )
 
-    marketaux = MarketauxClient()
-    gdelt = GDELTNewsClient(
-        max_retries=3,
-        backoff_seconds=5.0,
+    payload = {
+        "completed_windows": sorted(
+            completed_windows
+        )
+    }
+
+    CHECKPOINT_PATH.write_text(
+        json.dumps(
+            payload,
+            indent=2,
+        ),
+        encoding="utf-8",
     )
 
-    all_articles = []
 
-    for asset in ASSETS:
+def load_checkpoint() -> set[str]:
+    if not CHECKPOINT_PATH.exists():
+        return set()
+
+    try:
+        payload = json.loads(
+            CHECKPOINT_PATH.read_text(
+                encoding="utf-8"
+            )
+        )
+
+        return set(
+            payload.get(
+                "completed_windows",
+                [],
+            )
+        )
+
+    except Exception:
+        print(
+            "WARNING: checkpoint file could not "
+            "be read. Starting without checkpoint."
+        )
+
+        return set()
+
+
+def record_failed_window(
+    provider: str,
+    asset: str,
+    start: datetime,
+    end: datetime,
+    error: Exception,
+) -> None:
+
+    FAILED_WINDOWS_PATH.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    if FAILED_WINDOWS_PATH.exists():
         try:
-            all_articles.extend(
-                collect_marketaux(
-                    marketaux,
-                    asset,
+            failures = json.loads(
+                FAILED_WINDOWS_PATH.read_text(
+                    encoding="utf-8"
                 )
             )
-        except Exception as exc:
-            print(
-                f"Marketaux failed for {asset}: "
-                f"{type(exc).__name__}: {exc}"
-            )
+        except Exception:
+            failures = []
+    else:
+        failures = []
 
-        try:
-            all_articles.extend(
-                collect_gdelt(
-                    gdelt,
-                    asset,
-                )
-            )
-        except Exception as exc:
-            print(
-                f"GDELT failed for {asset}: "
-                f"{type(exc).__name__}: {exc}"
-            )
-
-    print(
-        f"\nRaw articles collected: "
-        f"{len(all_articles)}"
+    failures.append(
+        {
+            "provider": provider,
+            "asset": asset,
+            "start": start.isoformat(),
+            "end": end.isoformat(),
+            "error_type": type(error).__name__,
+            "error": str(error),
+        }
     )
 
-    deduplication_result = deduplicate_news(
-    all_articles
-)
-
-    all_articles = deduplication_result.articles
-
-    print(
-    f"Duplicates removed: "
-    f"{deduplication_result.duplicate_count}")
-    
-    all_articles = [
-    article
-    for article in all_articles
-    if START_DATE
-    <= article.published_at
-    < END_DATE
-    ]
-
-    print(
-        f"After deduplication: "
-        f"{len(all_articles)}"
+    FAILED_WINDOWS_PATH.write_text(
+        json.dumps(
+            failures,
+            indent=2,
+        ),
+        encoding="utf-8",
     )
+
+
+def window_key(
+    provider: str,
+    asset: str,
+    start: datetime,
+    end: datetime,
+) -> str:
+    return (
+        f"{provider}|"
+        f"{asset}|"
+        f"{start.isoformat()}|"
+        f"{end.isoformat()}"
+    )
+
+
+def save_articles(
+    articles: list[NewsArticle],
+    path: Path,
+) -> None:
+
+    if not articles:
+        return
 
     rows = [
         article_to_row(article)
-        for article in all_articles
+        for article in articles
     ]
-
-    if not rows:
-        print(
-            "No articles collected. "
-            "No output file written."
-        )
-        return
 
     df = pd.DataFrame(rows)
 
@@ -305,42 +223,513 @@ def main():
     ).reset_index(drop=True)
 
     df.to_csv(
-        OUTPUT_PATH,
+        path,
         index=False,
     )
 
+
+# ============================================================
+# Marketaux
+# ============================================================
+
+def collect_marketaux(
+    client: MarketauxClient,
+    asset: str,
+    completed_windows: set[str],
+) -> list[NewsArticle]:
+
+    print(f"\nMarketaux: {asset}")
+
+    articles = []
+
+    current = START_DATE
+
+    while current < END_DATE:
+
+        window_end = min(
+            current + timedelta(days=7),
+            END_DATE,
+        )
+
+        key = window_key(
+            "marketaux",
+            asset,
+            current,
+            window_end,
+        )
+
+        if key in completed_windows:
+            print(
+                "  SKIP completed window:",
+                current.isoformat(),
+                "→",
+                window_end.isoformat(),
+            )
+
+            current = window_end
+            continue
+
+        print(
+            "  Window:",
+            current.isoformat(),
+            "→",
+            window_end.isoformat(),
+        )
+
+        try:
+
+            page = 1
+
+            while True:
+
+                batch = client.fetch_news(
+                    asset=asset,
+                    limit=50,
+                    published_after=current.isoformat(),
+                    published_before=window_end.isoformat(),
+                    page=page,
+                )
+
+                print(
+                    f"    page {page}: "
+                    f"{len(batch)} articles"
+                )
+
+                articles.extend(batch)
+
+                if len(batch) < 50:
+                    break
+
+                page += 1
+
+            completed_windows.add(key)
+            save_checkpoint(
+                completed_windows
+            )
+
+        except (
+            requests.RequestException,
+            TimeoutError,
+            Exception,
+        ) as exc:
+
+            print(
+                f"    FAILED: "
+                f"{type(exc).__name__}: {exc}"
+            )
+
+            record_failed_window(
+                "marketaux",
+                asset,
+                current,
+                window_end,
+                exc,
+            )
+
+        current = window_end
+
+    return articles
+
+
+# ============================================================
+# GDELT
+# ============================================================
+
+def collect_gdelt(
+    client: GDELTNewsClient,
+    asset: str,
+    completed_windows: set[str],
+) -> list[NewsArticle]:
+
+    print(f"\nGDELT: {asset}")
+
+    articles = []
+
+    current = START_DATE
+
+    while current < END_DATE:
+
+        window_end = min(
+            current + timedelta(hours=6),
+            END_DATE,
+        )
+
+        key = window_key(
+            "gdelt",
+            asset,
+            current,
+            window_end,
+        )
+
+        if key in completed_windows:
+
+            print(
+                "  SKIP completed window:",
+                current.isoformat(),
+                "→",
+                window_end.isoformat(),
+            )
+
+            current = window_end
+            continue
+
+        print(
+            "  Window:",
+            current.isoformat(),
+            "→",
+            window_end.isoformat(),
+        )
+
+        try:
+
+            # Small pause prevents aggressive request bursts.
+            time.sleep(2)
+
+            batch = client.fetch_news(
+                asset=asset,
+                max_records=250,
+                start_datetime=current,
+                end_datetime=window_end,
+            )
+
+            print(
+                f"    {len(batch)} articles"
+            )
+
+            articles.extend(batch)
+
+            completed_windows.add(key)
+
+            save_checkpoint(
+                completed_windows
+            )
+
+        except (
+            requests.RequestException,
+            TimeoutError,
+            Exception,
+        ) as exc:
+
+            print(
+                f"    FAILED: "
+                f"{type(exc).__name__}: {exc}"
+            )
+
+            record_failed_window(
+                "gdelt",
+                asset,
+                current,
+                window_end,
+                exc,
+            )
+
+            # Do not mark the window complete.
+            # It can be retried later.
+
+        current = window_end
+
+    return articles
+
+
+# ============================================================
+# Main
+# ============================================================
+
+def main():
+
+    OUTPUT_PATH.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    completed_windows = load_checkpoint()
+
+    print("=" * 80)
+    print("HISTORICAL NEWS COLLECTION")
+    print("=" * 80)
+
+    print()
     print(
-        f"\nSaved: {OUTPUT_PATH}"
+        f"Collection period: "
+        f"{START_DATE.isoformat()} → "
+        f"{END_DATE.isoformat()}"
     )
 
     print(
-        "\nArticles by asset:"
+        f"Existing output: {OUTPUT_PATH}"
+    )
+
+    print(
+        f"Expanded output: {TEMP_OUTPUT_PATH}"
+    )
+
+    print(
+        f"Completed windows in checkpoint: "
+        f"{len(completed_windows)}"
+    )
+
+    # --------------------------------------------------------
+    # Existing data
+    # --------------------------------------------------------
+
+    existing_articles = []
+
+    if OUTPUT_PATH.exists():
+
+        print()
+        print(
+            "Loading existing news dataset..."
+        )
+
+        existing_df = pd.read_csv(
+            OUTPUT_PATH
+        )
+
+        existing_df["published_at"] = (
+            pd.to_datetime(
+                existing_df["published_at"],
+                utc=True,
+            )
+        )
+
+        for row in existing_df.itertuples(
+            index=False
+        ):
+
+            existing_articles.append(
+                NewsArticle(
+                    asset=row.asset,
+                    exchange=row.exchange,
+                    published_at=row.published_at.to_pydatetime(),
+                    source=row.source,
+                    headline=row.headline,
+                    text=(
+                        ""
+                        if pd.isna(row.text)
+                        else str(row.text)
+                    ),
+                    url=row.url,
+                )
+            )
+
+        print(
+            f"Existing articles: "
+            f"{len(existing_articles):,}"
+        )
+
+    # --------------------------------------------------------
+    # Providers
+    # --------------------------------------------------------
+
+    marketaux = MarketauxClient()
+
+    gdelt = GDELTNewsClient(
+        timeout=30,
+        max_retries=3,
+        backoff_seconds=5.0,
+    )
+
+    collected_articles = []
+
+    # --------------------------------------------------------
+    # Collection
+    # --------------------------------------------------------
+
+    for asset in ASSETS:
+
+        try:
+
+            collected_articles.extend(
+                collect_marketaux(
+                    marketaux,
+                    asset,
+                    completed_windows,
+                )
+            )
+
+        except Exception as exc:
+
+            print(
+                f"Marketaux failed for {asset}: "
+                f"{type(exc).__name__}: {exc}"
+            )
+
+        try:
+
+            collected_articles.extend(
+                collect_gdelt(
+                    gdelt,
+                    asset,
+                    completed_windows,
+                )
+            )
+
+        except Exception as exc:
+
+            print(
+                f"GDELT failed for {asset}: "
+                f"{type(exc).__name__}: {exc}"
+            )
+
+    print()
+    print(
+        f"New articles collected: "
+        f"{len(collected_articles):,}"
+    )
+
+    # --------------------------------------------------------
+    # Combine
+    # --------------------------------------------------------
+
+    all_articles = (
+        existing_articles
+        + collected_articles
+    )
+
+    print(
+        f"Combined articles before deduplication: "
+        f"{len(all_articles):,}"
+    )
+
+    # --------------------------------------------------------
+    # Deduplicate
+    # --------------------------------------------------------
+
+    deduplication_result = (
+        deduplicate_news(
+            all_articles
+        )
+    )
+
+    all_articles = (
+        deduplication_result.articles
+    )
+
+    print(
+        f"Duplicates removed: "
+        f"{deduplication_result.duplicate_count:,}"
+    )
+
+    # --------------------------------------------------------
+    # Date validation
+    # --------------------------------------------------------
+
+    all_articles = [
+        article
+        for article in all_articles
+        if START_DATE
+        <= article.published_at
+        < END_DATE
+    ]
+
+    print(
+        f"Articles inside requested date range: "
+        f"{len(all_articles):,}"
+    )
+
+    # --------------------------------------------------------
+    # Save expanded dataset
+    # --------------------------------------------------------
+
+    if not all_articles:
+
+        print(
+            "\nNo articles available."
+        )
+
+        print(
+            "Existing dataset was NOT modified."
+        )
+
+        return
+
+    save_articles(
+        all_articles,
+        TEMP_OUTPUT_PATH,
+    )
+
+    print()
+    print(
+        f"Saved expanded dataset:"
     )
     print(
-        df["asset"]
-        .value_counts()
+        TEMP_OUTPUT_PATH
+    )
+
+    # --------------------------------------------------------
+    # Summary
+    # --------------------------------------------------------
+
+    final_df = pd.read_csv(
+        TEMP_OUTPUT_PATH
+    )
+
+    final_df["published_at"] = (
+        pd.to_datetime(
+            final_df["published_at"],
+            utc=True,
+        )
+    )
+
+    print()
+    print(
+        "ARTICLES BY ASSET"
+    )
+    print("-" * 80)
+
+    print(
+        final_df[
+            "asset"
+        ].value_counts()
         .to_string()
     )
 
+    print()
     print(
-        "\nArticles by source:"
+        "ARTICLES BY SOURCE"
     )
+    print("-" * 80)
+
     print(
-        df["source"]
+        final_df[
+            "source"
+        ]
         .str.split(":")
         .str[0]
         .value_counts()
         .to_string()
     )
 
+    print()
     print(
-        "\nDate range:"
+        "DATE RANGE"
     )
+    print("-" * 80)
+
     print(
-        df["published_at"].min(),
+        final_df["published_at"].min(),
         "→",
-        df["published_at"].max(),
+        final_df["published_at"].max(),
     )
+
+    print()
+    print(
+        "IMPORTANT:"
+    )
+
+    print(
+        "The existing research_news.csv was not overwritten."
+    )
+
+    print(
+        "Review research_news_expanded.csv before promotion."
+    )
+
+    print("=" * 80)
+    print(
+        "HISTORICAL NEWS COLLECTION COMPLETE"
+    )
+    print("=" * 80)
 
 
 if __name__ == "__main__":

@@ -16,7 +16,7 @@ from src.sentiment.news_preparation import (
 
 
 INPUT_PATH = (
-    "data/raw/news/research_news.csv"
+    "data/raw/news/research_news_expanded.csv"
 )
 
 OUTPUT_PATH = (
