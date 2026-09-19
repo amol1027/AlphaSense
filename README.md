@@ -4,11 +4,13 @@
 
 ## Current Status
 
-**Phase 0A — Foundation: COMPLETE**
+**Phase 0 — Small-sample research: COMPLETE (see `docs/phase_0_results.md`)**
 
-**Phase 0B — Modeling & Evaluation: IN PROGRESS**
+**Phase 1 — Expanded dataset, frozen locked evaluation: FROZEN (see `docs/phase_1_results.md`)**
 
-**Current test status: 208 passed, 1 warning**
+**Phase 2 — News-signal consolidation through 2.7: CLOSED (see `docs/phase2_news_signal_consolidation.md`)**
+
+**Current test status: 256 passed, 2 warnings**
 
 The project currently covers:
 
@@ -25,25 +27,33 @@ The project currently covers:
 * FinBERT sentiment inference
 * News sentiment aggregation
 * Reddit ingestion and social features
-* Next-hour target generation
+* Next-hour target generation (binary + Phase 2 three-class thresholded ±0.203666%)
 * Temporal alignment and leakage prevention
 * Chronological train/validation/test splitting
-* Logistic Regression baseline
+* Logistic Regression baseline + Random Forest / HistGradientBoosting comparison
+* Normalized/scale-independent market features (`src/features/market_features.py`)
+* Majority-class baseline (`src/modeling/baseline.py`)
 * Feature ablation
 * Asset-level evaluation
 * Expanding-window walk-forward evaluation
-* News-vs-market per-period comparison
+* News-vs-market per-period and matched-sample comparison
+* Phase 1 locked holdout evaluation (2026-08-10 onward, untouched)
 * Automated tests
 
 ### Current research finding
 
-The current Logistic Regression baseline does **not** demonstrate robust within-asset predictive power.
+On the expanded Phase 1 dataset (28,564 rows), frozen candidates performed at or below the majority baseline on the untouched final holdout:
 
-The current FinBERT news features also do **not** demonstrate a stable predictive improvement over the market-only baseline.
+```text
+RELIANCE: 47.95% balanced accuracy vs 50.00% baseline
+TCS:      44.66% balanced accuracy vs 50.00% baseline
+```
 
-This is a research finding, not a failure of the ingestion or sentiment pipeline.
+Phase 2 found only preliminary asset-specific news value for RELIANCE (matched-sample +5.52pp balanced accuracy on 135 OOS rows, 60m window) and no consistent benefit for TCS. Intensity and selective-regime variants were not promoted.
 
-**Next milestone: Normalize market features and establish stronger majority/market/news baselines.**
+This is a negative research result, not an implementation failure. See `docs/phase_1_results.md` and `docs/phase2_news_signal_consolidation.md`.
+
+**Next milestone: Phase 3 — new hypothesis only (alternative horizon/target, richer temporal/regime features, new modality such as real social data). Do not re-tune against frozen holdouts.**
 
 ---
 
@@ -145,7 +155,7 @@ Therefore:
 
 The final incomplete session window is excluded.
 
-The current real feature dataset contains:
+The Phase 0 real feature dataset contained:
 
 ```text
 1,276 feature rows
@@ -153,6 +163,16 @@ The current real feature dataset contains:
 638 TCS
 29 trading days
 22 prediction rows per asset per trading day
+```
+
+The expanded Phase 1 feature dataset (`data/processed/phase1_features.csv`, git-ignored build artifact) contains:
+
+```text
+28,564 feature rows
+14,282 RELIANCE
+14,282 TCS
+2024-01-01 → 2026-08-21
+Final locked holdout from 2026-08-10 (10 sessions, 210 usable obs/asset)
 ```
 
 ---
@@ -474,10 +494,13 @@ Each test period is evaluated using only information available before that perio
 
 # Modeling
 
-The current baseline model is:
+Baseline models evaluated:
 
 ```text
 Logistic Regression
+Random Forest
+HistGradientBoosting
+Majority-class baseline (src/modeling/baseline.py)
 ```
 
 Current experiments compare:
@@ -492,21 +515,7 @@ Market + Reddit
 Market + News + Reddit
 ```
 
-The current market feature set uses:
-
-```text
-open
-high
-low
-close
-volume
-```
-
-These are currently raw price/volume features.
-
-**Next modeling improvement:** replace raw price levels with normalized, scale-independent market features.
-
-Candidate features include:
+The frozen market feature set uses normalized features (`src/features/market_features.py`):
 
 ```text
 return_15m
@@ -515,22 +524,15 @@ return_1h
 high_low_range
 close_open_return
 volume_change
-volume_zscore
 ```
 
-These will be evaluated without removing the existing raw-feature baseline, allowing a direct comparison.
+Raw OHLCV levels are retained only as the Phase 0 baseline for comparison. Phase 1 frozen candidates are documented in `docs/phase_1_results.md`.
 
 ---
 
-# Current Walk-Forward Results
+# Phase 0 Walk-Forward Results (small-sample, superseded)
 
-The current expanding-window experiment uses:
-
-```text
-29 trading days
-10 initial training days
-19 out-of-sample test periods
-```
+The expanding-window experiment below used 29 trading days / 10 initial training days / 19 OOS periods. It is retained for history only. Locked results are in `docs/phase_0_results.md`, `docs/phase_1_results.md`.
 
 ## All Assets
 
@@ -649,18 +651,18 @@ The research pipeline therefore remains active.
 
 # Baselines
 
-The next evaluation stage will establish a stronger hierarchy of baselines:
+Implemented baseline hierarchy (`src/modeling/baseline.py`, `src/modeling/baseline_runner.py`):
 
 ```text
 Majority-class baseline
         ↓
-Raw market Logistic Regression
+Raw market Logistic Regression (Phase 0)
         ↓
-Normalized market Logistic Regression
+Normalized market Logistic Regression / tree models
         ↓
 Normalized market + News
         ↓
-Normalized market + News + Reddit
+Normalized market + News + Reddit (sample-only)
 ```
 
 All comparisons should use the same chronological/walk-forward evaluation framework.
@@ -704,10 +706,12 @@ pytest
 Current result:
 
 ```text
-208 passed, 1 warning
+256 passed, 2 warnings
 ```
 
-The warning currently comes from the tokenizer dependency used by the FinBERT stack and does not fail the test suite.
+Warnings:
+1. `transformers` BERT tokenizer `WordPiece.__init__` deprecation (FinBERT stack, does not fail suite).
+2. `src/ingestion/news/audit.py` dateutil fallback parse warning in `test_news_audit.py` (does not fail suite).
 
 ---
 
@@ -1139,35 +1143,27 @@ Automated tests
 
 ## Phase 0B — Modeling & Evaluation
 
-**IN PROGRESS**
-
-Completed:
+**COMPLETE** — see `docs/phase_0_results.md`.
 
 ```text
 Chronological train/validation/test split
 Leakage-safe modeling dataset
-Logistic Regression baseline
+Logistic Regression baseline + tree-model comparison
+Majority-class baseline
 Feature ablation
 Asset-level evaluation
 Walk-forward evaluation
 News-vs-market comparison
+Locked final evaluation (2026-08-03 onward, +0.96pp RELIANCE / +0.68pp TCS, not robust)
 ```
 
-Next:
+## Phase 1 — Expanded Dataset
 
-```text
-Majority-class baseline
-        ↓
-Normalized market features
-        ↓
-Normalized market baseline
-        ↓
-Normalized market + News
-        ↓
-Robust walk-forward comparison
-        ↓
-Statistical/robustness analysis
-```
+**FROZEN** — see `docs/phase_1_results.md`. Do not change final test period, targets, candidates, hyperparameters, thresholds, or data processing.
+
+## Phase 2 — News-Signal Consolidation
+
+**CLOSED** — see `docs/phase2_news_signal_consolidation.md` (through 2.7, 60m window frozen, ±0.203666% threshold, locked holdout from 2026-08-10 protected).
 
 ---
 
@@ -1204,9 +1200,9 @@ This is still a research/development prototype.
 * Some news articles do not contain full body text.
 * Reddit data is currently limited development data.
 * FinBERT is currently run locally.
-* The current model is a simple Logistic Regression baseline.
-* Raw OHLCV price levels are still being used as the market feature baseline.
-* Walk-forward evaluation currently contains 19 test periods.
+* The current model set is Logistic Regression / Random Forest / HistGradientBoosting baselines (no production model).
+* Normalized market features are now the frozen candidate representation; raw OHLCV is history-only.
+* Walk-forward evaluation history includes the Phase 0 19-period experiment; Phase 1 uses locked holdout + daily breakdown.
 * Statistical conclusions remain preliminary.
 * No live trading system exists.
 * No investment recommendation should be inferred from current outputs.
@@ -1217,29 +1213,18 @@ This is still a research/development prototype.
 # Current Milestone
 
 ```text
-Phase 0A — Foundation
-STATUS: COMPLETE
+Phase 0 — COMPLETE
 
-Phase 0B — Modeling & Evaluation
-STATUS: IN PROGRESS
+Phase 1 — FROZEN (locked evaluation below baseline, audits PASS)
 
-Phase 1 Market Data Validation
-STATUS: PASS
-
-Phase 1 News Collection
-STATUS: COMPLETE — audit pending
+Phase 2 — CLOSED (exploratory RELIANCE-only news signal, TCS not supported)
 
 Tests:
-208 passed, 1 warning
+256 passed, 2 warnings
 
-Current research status:
-- Leakage-safe chronological evaluation is implemented.
-- Raw-market Logistic Regression is near-chance within individual assets.
-- Pooled market-only performance is modestly above chance but unstable.
-- Current FinBERT News features do not show a stable improvement.
-- Reddit features currently show no measurable improvement.
+Untracked work needing a decision:
+- scripts/diagnose_phase2_news_intensity.py (Phase 2.6 diagnostic, currently untracked)
 
 Next:
-Audit historical news quality, then process FinBERT sentiment and establish
-normalized market / market + news baselines.
+Phase 3 new hypothesis only. Do not alter locked Phase 1 / Phase 2 holdouts, targets, or frozen candidates.
 ```
