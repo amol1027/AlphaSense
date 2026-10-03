@@ -1,0 +1,22 @@
+# AlphaSense account API (:8010).
+# Single worker is REQUIRED: the login/register rate limiter is per-process
+# memory (see src/auth/app.py). Multiple workers would each enforce an
+# independent budget. For more throughput, put a shared edge limiter in front.
+# Health: GET http://127.0.0.1:8010/api/auth/health -> 200 (503 on DB failure).
+[Unit]
+Description=AlphaSense account API
+After=network-online.target mysql.service
+Wants=network-online.target
+Requires=mysql.service
+
+[Service]
+Type=simple
+User=alphasense
+WorkingDirectory=/opt/alphasense
+EnvironmentFile=/opt/alphasense/.env
+ExecStart=/opt/alphasense/.venv/bin/python -m uvicorn src.auth.app:app --host 127.0.0.1 --port 8010 --workers 1
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

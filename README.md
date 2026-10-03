@@ -1,14 +1,18 @@
 # AlphaSense
 
-**AlphaSense** is an NSE/BSE-focused research project for building a next-hour market-direction prediction pipeline using market data, financial news, and Reddit/social signals.
+**AlphaSense** is an NSE/BSE-focused research project for predicting short-horizon market behavior using market data, financial news, and Reddit/social signals. Next-hour *direction* research is frozen as negative; the active signal is next-hour *range-regime* (volatility) prediction.
 
 ## Current Status
 
-**Phase 0 — Small-sample research: COMPLETE (see `docs/phase_0_results.md`)**
+**Phase 0 — Small-sample direction research: COMPLETE (see `docs/phase_0_results.md`)**
 
-**Phase 1 — Expanded dataset, frozen locked evaluation: FROZEN (see `docs/phase_1_results.md`)**
+**Phase 1 — Expanded direction dataset, frozen locked evaluation: FROZEN (see `docs/phase_1_results.md`)**
 
-**Phase 2 — News-signal consolidation through 2.7: CLOSED (see `docs/phase2_news_signal_consolidation.md`)**
+**Phase 2 — News-signal consolidation through 2.7: CLOSED (see `docs/phase_2_consolidation.md`)**
+
+**Phase 3 — Conditional-signal validation + 5-asset market baselines: COMPLETE (see `docs/phase_3_results.md`)**
+
+**Phase 4 — Volatility-regime pilot: PASS (see `docs/phase_4_pilot.md`)**
 
 **Current test status: 256 passed, 2 warnings**
 
@@ -37,23 +41,21 @@ The project currently covers:
 * Asset-level evaluation
 * Expanding-window walk-forward evaluation
 * News-vs-market per-period and matched-sample comparison
-* Phase 1 locked holdout evaluation (2026-08-10 onward, untouched)
+* Phase 1 locked holdout evaluation (2026-08-10 onward, scored once, never tuned against)
+* 5-asset market coverage: RELIANCE, TCS, HDFCBANK, INFY, ICICIBANK (83,259 combined 15m rows)
+* Next-hour range-regime (volatility) prediction — the first robust signal (Phase 4 PASS, 130/130 folds)
+* Frozen 9-feat volatility set: normalized market features + 1h trailing range/return stats
 * Automated tests
 
 ### Current research finding
 
-On the expanded Phase 1 dataset (28,564 rows), frozen candidates performed at or below the majority baseline on the untouched final holdout:
+Direction prediction is frozen as negative: on 5 assets / 130 walk-forward folds the normalized-feature logistic has median balanced-accuracy delta of +0.1pp over majority (55% win rate) and loses to majority on the locked holdout for every asset. News adds no stable value for direction (Phases 0–3) or on top of the volatility baseline (Phase 4.4).
 
-```text
-RELIANCE: 47.95% balanced accuracy vs 50.00% baseline
-TCS:      44.66% balanced accuracy vs 50.00% baseline
-```
+Range-regime (volatility) prediction passes robustly: 130/130 folds won, median +13.9pp, locked holdout beaten on all 5 assets (up to 0.68 vs 0.50 baseline). Edge decays with horizon (30m ≈ 1h > 2h > 4h); 1h frozen. See `docs/phase_3_results.md` and `docs/phase_4_pilot.md`.
 
-Phase 2 found only preliminary asset-specific news value for RELIANCE (matched-sample +5.52pp balanced accuracy on 135 OOS rows, 60m window) and no consistent benefit for TCS. Intensity and selective-regime variants were not promoted.
+**Next milestone: run the frozen 9-feature, 1h volatility model in prospective shadow mode. Refresh completed 15m Upstox candles into `data/interim/live_market_15m.csv`, serve and log predictions from that cache, then label them only after the next hour is present. No further direction/news iteration without a new hypothesis; locked holdout stays scored-once.**
 
-This is a negative research result, not an implementation failure. See `docs/phase_1_results.md` and `docs/phase2_news_signal_consolidation.md`.
-
-**Next milestone: Phase 3 — new hypothesis only (alternative horizon/target, richer temporal/regime features, new modality such as real social data). Do not re-tune against frozen holdouts.**
+To start the local dashboard and shadow runner, see [docs/STARTING_THE_APP.md](docs/STARTING_THE_APP.md).
 
 ---
 
@@ -1083,6 +1085,17 @@ isolation before running the full downloader.
 python scripts/test_historical_request.py
 ```
 
+### `check_upstox_token.py`
+
+Fail-loud token gate (exit 0 = valid, 1 = expired/missing). Upstox access
+tokens expire daily and require manual OAuth login to renew — there is no
+programmatic refresh, so run this before any refresh job or scheduled task
+rather than serving stale bars.
+
+```powershell
+python scripts/check_upstox_token.py
+```
+
 ---
 
 # Development Principles
@@ -1213,18 +1226,30 @@ This is still a research/development prototype.
 # Current Milestone
 
 ```text
-Phase 0 — COMPLETE
+Phase 0 — COMPLETE (direction, small sample, negative)
 
-Phase 1 — FROZEN (locked evaluation below baseline, audits PASS)
+Phase 1 — FROZEN (direction, locked evaluation below baseline, audits PASS)
 
-Phase 2 — CLOSED (exploratory RELIANCE-only news signal, TCS not supported)
+Phase 2 — CLOSED (news-signal consolidation; only conditional
+high-sentiment-magnitude lead, small-N)
+
+Phase 3 — COMPLETE (magnitude-regime FAIL; 5-asset expansion: market done,
+news blocked on coverage; market-only 5-asset baselines FAIL, 130 folds)
+
+Phase 4 — PASS (range-regime volatility pilot: 130/130 folds, minimal 9-feat
+set frozen, 1h horizon frozen; news-on-top FAIL)
 
 Tests:
 256 passed, 2 warnings
 
-Untracked work needing a decision:
-- scripts/diagnose_phase2_news_intensity.py (Phase 2.6 diagnostic, currently untracked)
-
 Next:
-Phase 3 new hypothesis only. Do not alter locked Phase 1 / Phase 2 holdouts, targets, or frozen candidates.
+Run the frozen 9-feature, 1h volatility model in prospective shadow mode.
+`python scripts/run_shadow.py` refreshes completed Upstox 15m candles into a
+rolling 7-day cache, labels outcomes once the next hour is present, and logs
+fresh predictions during NSE hours. Original research market files are kept.
+Run `python -m src.prediction.server` separately to serve the local dashboard/
+API; it reads the refresher's cache. The refresh uses
+`UPSTOX_ACCESS_TOKEN`; historical seed bars are excluded from prediction logs
+by the freshness gate. No direction/news re-tuning; locked holdout stays
+scored-once. Commits pending owner review (working tree intentionally uncommitted).
 ```

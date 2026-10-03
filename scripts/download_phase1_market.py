@@ -18,6 +18,18 @@ ASSETS = {
         "instrument_key": "NSE_EQ|INE467B01029",
         "exchange": "NSE",
     },
+    "HDFCBANK": {
+        "instrument_key": "NSE_EQ|INE040A01034",
+        "exchange": "NSE",
+    },
+    "INFY": {
+        "instrument_key": "NSE_EQ|INE009A01021",
+        "exchange": "NSE",
+    },
+    "ICICIBANK": {
+        "instrument_key": "NSE_EQ|INE090A01021",
+        "exchange": "NSE",
+    },
 }
 
 

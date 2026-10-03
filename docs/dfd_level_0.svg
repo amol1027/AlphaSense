@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">AlphaSense Level 0 Data Flow Diagram</title>
+  <desc id="desc">Context diagram showing AlphaSense as one process exchanging data with a user, administrator, market data provider, financial news provider, and Reddit/social data provider.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="10" refX="10" refY="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#334155"/></marker>
+    <style>
+      text{font-family:Segoe UI,Arial,sans-serif;fill:#172033}.entity{fill:#f8fafc;stroke:#334155;stroke-width:2.5}.process{fill:#eff6ff;stroke:#1d4ed8;stroke-width:3}.flow{fill:none;stroke:#334155;stroke-width:2.7;marker-end:url(#arrow)}.title{font-size:30px;font-weight:700}.subtitle{font-size:16px;fill:#475569}.entityText{font-size:19px;font-weight:700}.processText{font-size:23px;font-weight:700}.processDetail{font-size:16px;fill:#334155}.flowLabel{font-size:15px;font-weight:600;fill:#334155;paint-order:stroke;stroke:#fff;stroke-width:6;stroke-linejoin:round}.note{font-size:14px;fill:#475569}
+    </style>
+  </defs>
+  <rect width="1600" height="1000" fill="#fff"/>
+  <text x="800" y="55" text-anchor="middle" class="title">AlphaSense — Level 0 Data Flow Diagram</text>
+  <text x="800" y="84" text-anchor="middle" class="subtitle">Context diagram · one process representing the complete system</text>
+
+  <!-- External entities -->
+  <rect x="70" y="360" width="250" height="130" rx="4" class="entity"/>
+  <text x="195" y="420" text-anchor="middle" class="entityText"><tspan x="195">User</tspan><tspan x="195" dy="27" font-size="15" font-weight="400">Investor / analyst</tspan></text>
+
+  <rect x="80" y="730" width="250" height="120" rx="4" class="entity"/>
+  <text x="205" y="780" text-anchor="middle" class="entityText"><tspan x="205">Administrator</tspan><tspan x="205" dy="26" font-size="15" font-weight="400">Research / model operator</tspan></text>
+
+  <rect x="670" y="125" width="260" height="110" rx="4" class="entity"/>
+  <text x="800" y="172" text-anchor="middle" class="entityText"><tspan x="800">NSE/BSE Market</tspan><tspan x="800" dy="26">Data Provider</tspan></text>
+
+  <rect x="1270" y="290" width="250" height="120" rx="4" class="entity"/>
+  <text x="1395" y="338" text-anchor="middle" class="entityText"><tspan x="1395">Financial News</tspan><tspan x="1395" dy="26">Provider</tspan></text>
+
+  <rect x="1270" y="620" width="250" height="120" rx="4" class="entity"/>
+  <text x="1395" y="668" text-anchor="middle" class="entityText"><tspan x="1395">Reddit / Social</tspan><tspan x="1395" dy="26">Data Provider</tspan></text>
+
+  <!-- The single context process -->
+  <circle cx="800" cy="535" r="205" class="process"/>
+  <text x="800" y="485" text-anchor="middle" class="processText"><tspan x="800">0</tspan><tspan x="800" dy="34">AlphaSense</tspan><tspan x="800" dy="29" font-size="18">Market Research &amp;</tspan><tspan x="800" dy="25" font-size="18">Prediction System</tspan></text>
+
+  <!-- User data flows -->
+  <path d="M320 405 C430 405 510 450 598 485" class="flow"/>
+  <text x="420" y="390" text-anchor="middle" class="flowLabel"><tspan x="420">Asset and exchange selection</tspan><tspan x="420" dy="20">Prediction request / timestamp</tspan></text>
+  <path d="M598 565 C505 590 420 505 320 470" class="flow"/>
+  <text x="425" y="555" text-anchor="middle" class="flowLabel"><tspan x="425">Prediction class and probabilities</tspan><tspan x="425" dy="20">Market, news, social dashboard data</tspan><tspan x="425" dy="20">Prediction history</tspan></text>
+
+  <!-- Administrator data flows -->
+  <path d="M330 760 C470 720 535 675 620 650" class="flow"/>
+  <text x="460" y="710" text-anchor="middle" class="flowLabel"><tspan x="460">Training / evaluation request</tspan><tspan x="460" dy="20">Model and feature configuration</tspan></text>
+  <path d="M640 700 C540 790 445 825 330 815" class="flow"/>
+  <text x="500" y="835" text-anchor="middle" class="flowLabel"><tspan x="500">Evaluation metrics and baseline comparison</tspan><tspan x="500" dy="20">Model information</tspan></text>
+
+  <!-- Market data flow -->
+  <path d="M800 235 V325" class="flow"/>
+  <text x="815" y="278" class="flowLabel">OHLCV market bars</text>
+
+  <!-- Financial news and social data flows -->
+  <path d="M1270 345 C1150 345 1090 385 990 435" class="flow"/>
+  <text x="1120" y="335" text-anchor="middle" class="flowLabel"><tspan x="1120">Articles and publication timestamps</tspan><tspan x="1120" dy="20">News sentiment data</tspan></text>
+
+  <path d="M1270 680 C1150 680 1085 655 989 620" class="flow"/>
+  <text x="1125" y="706" text-anchor="middle" class="flowLabel"><tspan x="1125">Posts, timestamps, scores,</tspan><tspan x="1125" dy="20">and engagement data</tspan></text>
+
+  <text x="800" y="960" text-anchor="middle" class="note">Level 0 shows external exchanges only. Internal processing steps and data stores belong in Level 1 DFD.</text>
+</svg>

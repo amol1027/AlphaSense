@@ -1,0 +1,110 @@
+@startuml
+title AlphaSense — Next-Hour Prediction Request
+autonumber
+hide footbox
+skinparam style strictuml
+skinparam sequence {
+  ArrowColor #334155
+  LifeLineBorderColor #64748b
+  LifeLineBackgroundColor #f8fafc
+  ParticipantBorderColor #2563eb
+  ParticipantBackgroundColor #eff6ff
+  ActorBorderColor #334155
+  ActorBackgroundColor #f8fafc
+  GroupBorderColor #94a3b8
+  GroupBackgroundColor #f8fafc
+}
+
+actor User
+boundary Dashboard
+control PredictionAPI
+control PredictionService
+control FeatureBuilder
+participant TradingCalendar
+participant MarketDataProvider
+participant NewsProvider
+participant FinBERTSentimentProvider
+participant RedditDataProvider
+participant TrainedPredictionModel
+database PredictionStore
+entity Prediction
+
+User -> Dashboard: Select asset and request prediction
+activate Dashboard
+Dashboard -> PredictionAPI: requestPrediction(asset, exchange, timestamp)
+activate PredictionAPI
+PredictionAPI -> PredictionService: generatePrediction(request)
+activate PredictionService
+
+PredictionService -> TradingCalendar: isValidPredictionTimestamp(timestamp)
+activate TradingCalendar
+TradingCalendar --> PredictionService: valid / invalid
+deactivate TradingCalendar
+
+alt [timestamp outside a valid NSE/BSE session or window]
+  PredictionService --> PredictionAPI: validation error
+  PredictionAPI --> Dashboard: show validation message
+  Dashboard --> User: Display request error
+else [valid trading session and timestamp]
+  PredictionService -> FeatureBuilder: buildSnapshot(asset, exchange, timestamp)
+  activate FeatureBuilder
+
+  par Retrieve market data
+    FeatureBuilder -> MarketDataProvider: fetchMarketData(asset, time range)
+    activate MarketDataProvider
+    MarketDataProvider --> FeatureBuilder: market bars
+    deactivate MarketDataProvider
+  else Retrieve news and sentiment
+    FeatureBuilder -> NewsProvider: fetchNews(asset, time range)
+    activate NewsProvider
+    NewsProvider --> FeatureBuilder: eligible news articles
+    FeatureBuilder -> FinBERTSentimentProvider: predictBatch(article text)
+    activate FinBERTSentimentProvider
+    FinBERTSentimentProvider --> FeatureBuilder: article sentiment scores
+    deactivate FinBERTSentimentProvider
+    deactivate NewsProvider
+  else Retrieve social data
+    FeatureBuilder -> RedditDataProvider: fetchPosts(asset, time range)
+    activate RedditDataProvider
+    RedditDataProvider --> FeatureBuilder: eligible Reddit posts
+    deactivate RedditDataProvider
+  end
+
+  note over FeatureBuilder
+    Align inputs to prediction time t.
+    Use only information available at or before t.
+    Build market, news-sentiment, and social features.
+  end note
+  FeatureBuilder --> PredictionService: FeatureSnapshot
+  deactivate FeatureBuilder
+
+  alt [snapshot invalid or required inputs unavailable]
+    PredictionService --> PredictionAPI: data unavailable error
+    PredictionAPI --> Dashboard: show unavailable-data message
+    Dashboard --> User: Display error
+  else [snapshot valid]
+    PredictionService -> TrainedPredictionModel: predict(featureSnapshot)
+    activate TrainedPredictionModel
+    TrainedPredictionModel --> PredictionService: predicted class and class probabilities
+    deactivate TrainedPredictionModel
+
+    create Prediction
+    PredictionService -> Prediction: create(timestamp, class, probabilities)
+    activate Prediction
+    PredictionService -> PredictionStore: save(Prediction, FeatureSnapshot)
+    activate PredictionStore
+    PredictionStore --> PredictionService: saved prediction ID
+    deactivate PredictionStore
+    Prediction --> PredictionService: prediction record
+    deactivate Prediction
+
+    PredictionService --> PredictionAPI: prediction result and ID
+    PredictionAPI --> Dashboard: return prediction and probabilities
+    Dashboard --> User: Display prediction and probability details
+  end
+end
+
+deactivate PredictionService
+deactivate PredictionAPI
+deactivate Dashboard
+@enduml

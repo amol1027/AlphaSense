@@ -1,0 +1,21 @@
+# AlphaSense shadow runner: refreshes 15m candles + logs shadow predictions
+# during NSE hours (09:15-15:45 IST, weekdays, every 15 min).
+# Fails fast at boot when UPSTOX_ACCESS_TOKEN is missing/expired (renew via
+# manual OAuth, then `systemctl restart alphasense-shadow`). RestartSec=60
+# keeps a bad token from hot-looping the Upstox probe.
+[Unit]
+Description=AlphaSense shadow runner
+After=network-online.target alphasense-prediction.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=alphasense
+WorkingDirectory=/opt/alphasense
+EnvironmentFile=/opt/alphasense/.env
+ExecStart=/opt/alphasense/.venv/bin/python scripts/run_shadow.py
+Restart=on-failure
+RestartSec=60
+
+[Install]
+WantedBy=multi-user.target

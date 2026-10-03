@@ -2206,5 +2206,957 @@
     "end": "2026-08-11T00:00:00+00:00",
     "error_type": "ReadTimeout",
     "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Read timed out. (read timeout=30)"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-01T18:00:00+00:00",
+    "end": "2026-07-02T00:00:00+00:00",
+    "error_type": "ConnectionError",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Max retries exceeded with url: /api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260701180000&enddatetime=20260702000000 (Caused by NameResolutionError(\"HTTPSConnection(host='api.gdeltproject.org', port=443): Failed to resolve 'api.gdeltproject.org' ([Errno 11001] getaddrinfo failed)\"))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-02T00:00:00+00:00",
+    "end": "2026-07-02T06:00:00+00:00",
+    "error_type": "ConnectionError",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Max retries exceeded with url: /api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260702000000&enddatetime=20260702060000 (Caused by NameResolutionError(\"HTTPSConnection(host='api.gdeltproject.org', port=443): Failed to resolve 'api.gdeltproject.org' ([Errno 11001] getaddrinfo failed)\"))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-02T06:00:00+00:00",
+    "end": "2026-07-02T12:00:00+00:00",
+    "error_type": "ConnectionError",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Max retries exceeded with url: /api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260702060000&enddatetime=20260702120000 (Caused by NameResolutionError(\"HTTPSConnection(host='api.gdeltproject.org', port=443): Failed to resolve 'api.gdeltproject.org' ([Errno 11001] getaddrinfo failed)\"))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-02T18:00:00+00:00",
+    "end": "2026-07-03T00:00:00+00:00",
+    "error_type": "ConnectionError",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Max retries exceeded with url: /api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260702180000&enddatetime=20260703000000 (Caused by NameResolutionError(\"HTTPSConnection(host='api.gdeltproject.org', port=443): Failed to resolve 'api.gdeltproject.org' ([Errno 11001] getaddrinfo failed)\"))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-03T00:00:00+00:00",
+    "end": "2026-07-03T06:00:00+00:00",
+    "error_type": "ConnectionError",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Max retries exceeded with url: /api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260703000000&enddatetime=20260703060000 (Caused by NameResolutionError(\"HTTPSConnection(host='api.gdeltproject.org', port=443): Failed to resolve 'api.gdeltproject.org' ([Errno 11001] getaddrinfo failed)\"))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-03T12:00:00+00:00",
+    "end": "2026-07-03T18:00:00+00:00",
+    "error_type": "ConnectionError",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Max retries exceeded with url: /api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260703120000&enddatetime=20260703180000 (Caused by NameResolutionError(\"HTTPSConnection(host='api.gdeltproject.org', port=443): Failed to resolve 'api.gdeltproject.org' ([Errno 11001] getaddrinfo failed)\"))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-04T00:00:00+00:00",
+    "end": "2026-07-04T06:00:00+00:00",
+    "error_type": "ConnectionError",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Max retries exceeded with url: /api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260704000000&enddatetime=20260704060000 (Caused by NameResolutionError(\"HTTPSConnection(host='api.gdeltproject.org', port=443): Failed to resolve 'api.gdeltproject.org' ([Errno 11001] getaddrinfo failed)\"))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-04T12:00:00+00:00",
+    "end": "2026-07-04T18:00:00+00:00",
+    "error_type": "ConnectionError",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Max retries exceeded with url: /api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260704120000&enddatetime=20260704180000 (Caused by NameResolutionError(\"HTTPSConnection(host='api.gdeltproject.org', port=443): Failed to resolve 'api.gdeltproject.org' ([Errno 11001] getaddrinfo failed)\"))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-05T00:00:00+00:00",
+    "end": "2026-07-05T06:00:00+00:00",
+    "error_type": "ConnectionError",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Max retries exceeded with url: /api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260705000000&enddatetime=20260705060000 (Caused by NameResolutionError(\"HTTPSConnection(host='api.gdeltproject.org', port=443): Failed to resolve 'api.gdeltproject.org' ([Errno 11001] getaddrinfo failed)\"))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-06T12:00:00+00:00",
+    "end": "2026-07-06T18:00:00+00:00",
+    "error_type": "ConnectionError",
+    "error": "('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-06T18:00:00+00:00",
+    "end": "2026-07-07T00:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260706180000&enddatetime=20260707000000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-08T18:00:00+00:00",
+    "end": "2026-07-09T00:00:00+00:00",
+    "error_type": "ReadTimeout",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Read timed out. (read timeout=30)"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-09T00:00:00+00:00",
+    "end": "2026-07-09T06:00:00+00:00",
+    "error_type": "ConnectTimeout",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Max retries exceeded with url: /api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260709000000&enddatetime=20260709060000 (Caused by ConnectTimeoutError(<HTTPSConnection(host='api.gdeltproject.org', port=443) at 0x24c69906ad0>, 'Connection to api.gdeltproject.org timed out. (connect timeout=30)'))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-09T06:00:00+00:00",
+    "end": "2026-07-09T12:00:00+00:00",
+    "error_type": "ReadTimeout",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Read timed out. (read timeout=30)"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-10T00:00:00+00:00",
+    "end": "2026-07-10T06:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260710000000&enddatetime=20260710060000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-11T00:00:00+00:00",
+    "end": "2026-07-11T06:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260711000000&enddatetime=20260711060000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-11T18:00:00+00:00",
+    "end": "2026-07-12T00:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260711180000&enddatetime=20260712000000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-13T12:00:00+00:00",
+    "end": "2026-07-13T18:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260713120000&enddatetime=20260713180000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-15T00:00:00+00:00",
+    "end": "2026-07-15T06:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260715000000&enddatetime=20260715060000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-15T06:00:00+00:00",
+    "end": "2026-07-15T12:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260715060000&enddatetime=20260715120000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-16T06:00:00+00:00",
+    "end": "2026-07-16T12:00:00+00:00",
+    "error_type": "ReadTimeout",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Read timed out. (read timeout=30)"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-17T06:00:00+00:00",
+    "end": "2026-07-17T12:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260717060000&enddatetime=20260717120000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-18T00:00:00+00:00",
+    "end": "2026-07-18T06:00:00+00:00",
+    "error_type": "ConnectionError",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Max retries exceeded with url: /api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260718000000&enddatetime=20260718060000 (Caused by NameResolutionError(\"HTTPSConnection(host='api.gdeltproject.org', port=443): Failed to resolve 'api.gdeltproject.org' ([Errno 11001] getaddrinfo failed)\"))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-18T06:00:00+00:00",
+    "end": "2026-07-18T12:00:00+00:00",
+    "error_type": "ConnectionError",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Max retries exceeded with url: /api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260718060000&enddatetime=20260718120000 (Caused by NewConnectionError(\"HTTPSConnection(host='api.gdeltproject.org', port=443): Failed to establish a new connection: [WinError 10053] An established connection was aborted by the software in your host machine\"))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-18T12:00:00+00:00",
+    "end": "2026-07-18T18:00:00+00:00",
+    "error_type": "ConnectionError",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Max retries exceeded with url: /api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260718120000&enddatetime=20260718180000 (Caused by NameResolutionError(\"HTTPSConnection(host='api.gdeltproject.org', port=443): Failed to resolve 'api.gdeltproject.org' ([Errno 11001] getaddrinfo failed)\"))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-18T18:00:00+00:00",
+    "end": "2026-07-19T00:00:00+00:00",
+    "error_type": "ConnectionError",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Max retries exceeded with url: /api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260718180000&enddatetime=20260719000000 (Caused by NameResolutionError(\"HTTPSConnection(host='api.gdeltproject.org', port=443): Failed to resolve 'api.gdeltproject.org' ([Errno 11001] getaddrinfo failed)\"))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-19T00:00:00+00:00",
+    "end": "2026-07-19T06:00:00+00:00",
+    "error_type": "ConnectionError",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Max retries exceeded with url: /api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260719000000&enddatetime=20260719060000 (Caused by NameResolutionError(\"HTTPSConnection(host='api.gdeltproject.org', port=443): Failed to resolve 'api.gdeltproject.org' ([Errno 11001] getaddrinfo failed)\"))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-19T06:00:00+00:00",
+    "end": "2026-07-19T12:00:00+00:00",
+    "error_type": "ConnectionError",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Max retries exceeded with url: /api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260719060000&enddatetime=20260719120000 (Caused by NameResolutionError(\"HTTPSConnection(host='api.gdeltproject.org', port=443): Failed to resolve 'api.gdeltproject.org' ([Errno 11001] getaddrinfo failed)\"))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "RELIANCE",
+    "start": "2026-07-01T06:00:00+00:00",
+    "end": "2026-07-01T12:00:00+00:00",
+    "error_type": "ConnectionError",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Max retries exceeded with url: /api/v2/doc/doc?query=Reliance+Industries&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260701060000&enddatetime=20260701120000 (Caused by NameResolutionError(\"HTTPSConnection(host='api.gdeltproject.org', port=443): Failed to resolve 'api.gdeltproject.org' ([Errno 11001] getaddrinfo failed)\"))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "RELIANCE",
+    "start": "2026-07-01T12:00:00+00:00",
+    "end": "2026-07-01T18:00:00+00:00",
+    "error_type": "ConnectionError",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Max retries exceeded with url: /api/v2/doc/doc?query=Reliance+Industries&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260701120000&enddatetime=20260701180000 (Caused by NameResolutionError(\"HTTPSConnection(host='api.gdeltproject.org', port=443): Failed to resolve 'api.gdeltproject.org' ([Errno 11001] getaddrinfo failed)\"))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "RELIANCE",
+    "start": "2026-07-01T18:00:00+00:00",
+    "end": "2026-07-02T00:00:00+00:00",
+    "error_type": "ConnectionError",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Max retries exceeded with url: /api/v2/doc/doc?query=Reliance+Industries&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260701180000&enddatetime=20260702000000 (Caused by NameResolutionError(\"HTTPSConnection(host='api.gdeltproject.org', port=443): Failed to resolve 'api.gdeltproject.org' ([Errno 11001] getaddrinfo failed)\"))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "RELIANCE",
+    "start": "2026-07-02T06:00:00+00:00",
+    "end": "2026-07-02T12:00:00+00:00",
+    "error_type": "ConnectionError",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Max retries exceeded with url: /api/v2/doc/doc?query=Reliance+Industries&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260702060000&enddatetime=20260702120000 (Caused by NameResolutionError(\"HTTPSConnection(host='api.gdeltproject.org', port=443): Failed to resolve 'api.gdeltproject.org' ([Errno 11001] getaddrinfo failed)\"))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "RELIANCE",
+    "start": "2026-07-02T12:00:00+00:00",
+    "end": "2026-07-02T18:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Reliance+Industries&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260702120000&enddatetime=20260702180000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "RELIANCE",
+    "start": "2026-07-02T18:00:00+00:00",
+    "end": "2026-07-03T00:00:00+00:00",
+    "error_type": "ConnectTimeout",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Max retries exceeded with url: /api/v2/doc/doc?query=Reliance+Industries&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260702180000&enddatetime=20260703000000 (Caused by ConnectTimeoutError(<HTTPSConnection(host='api.gdeltproject.org', port=443) at 0x24c69975bd0>, 'Connection to api.gdeltproject.org timed out. (connect timeout=30)'))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "RELIANCE",
+    "start": "2026-07-03T06:00:00+00:00",
+    "end": "2026-07-03T12:00:00+00:00",
+    "error_type": "ConnectionError",
+    "error": "('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "RELIANCE",
+    "start": "2026-07-03T12:00:00+00:00",
+    "end": "2026-07-03T18:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Reliance+Industries&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260703120000&enddatetime=20260703180000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "RELIANCE",
+    "start": "2026-07-03T18:00:00+00:00",
+    "end": "2026-07-04T00:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Reliance+Industries&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260703180000&enddatetime=20260704000000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "RELIANCE",
+    "start": "2026-07-04T06:00:00+00:00",
+    "end": "2026-07-04T12:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Reliance+Industries&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260704060000&enddatetime=20260704120000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "RELIANCE",
+    "start": "2026-07-04T12:00:00+00:00",
+    "end": "2026-07-04T18:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Reliance+Industries&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260704120000&enddatetime=20260704180000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "RELIANCE",
+    "start": "2026-07-05T06:00:00+00:00",
+    "end": "2026-07-05T12:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Reliance+Industries&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260705060000&enddatetime=20260705120000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "RELIANCE",
+    "start": "2026-07-05T12:00:00+00:00",
+    "end": "2026-07-05T18:00:00+00:00",
+    "error_type": "ConnectTimeout",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Max retries exceeded with url: /api/v2/doc/doc?query=Reliance+Industries&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260705120000&enddatetime=20260705180000 (Caused by ConnectTimeoutError(<HTTPSConnection(host='api.gdeltproject.org', port=443) at 0x24c69976350>, 'Connection to api.gdeltproject.org timed out. (connect timeout=30)'))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "RELIANCE",
+    "start": "2026-07-08T12:00:00+00:00",
+    "end": "2026-07-08T18:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Reliance+Industries&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260708120000&enddatetime=20260708180000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "RELIANCE",
+    "start": "2026-07-08T18:00:00+00:00",
+    "end": "2026-07-09T00:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Reliance+Industries&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260708180000&enddatetime=20260709000000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "HDFCBANK",
+    "start": "2026-07-01T06:00:00+00:00",
+    "end": "2026-07-01T12:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=HDFC+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260701060000&enddatetime=20260701120000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "HDFCBANK",
+    "start": "2026-07-02T06:00:00+00:00",
+    "end": "2026-07-02T12:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=HDFC+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260702060000&enddatetime=20260702120000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "HDFCBANK",
+    "start": "2026-07-03T00:00:00+00:00",
+    "end": "2026-07-03T06:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=HDFC+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260703000000&enddatetime=20260703060000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "HDFCBANK",
+    "start": "2026-07-03T06:00:00+00:00",
+    "end": "2026-07-03T12:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=HDFC+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260703060000&enddatetime=20260703120000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "HDFCBANK",
+    "start": "2026-07-03T18:00:00+00:00",
+    "end": "2026-07-04T00:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=HDFC+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260703180000&enddatetime=20260704000000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "HDFCBANK",
+    "start": "2026-07-04T18:00:00+00:00",
+    "end": "2026-07-05T00:00:00+00:00",
+    "error_type": "ConnectionError",
+    "error": "('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "HDFCBANK",
+    "start": "2026-07-05T00:00:00+00:00",
+    "end": "2026-07-05T06:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=HDFC+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260705000000&enddatetime=20260705060000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "HDFCBANK",
+    "start": "2026-07-05T06:00:00+00:00",
+    "end": "2026-07-05T12:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=HDFC+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260705060000&enddatetime=20260705120000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "HDFCBANK",
+    "start": "2026-07-06T06:00:00+00:00",
+    "end": "2026-07-06T12:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=HDFC+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260706060000&enddatetime=20260706120000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "HDFCBANK",
+    "start": "2026-07-07T12:00:00+00:00",
+    "end": "2026-07-07T18:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=HDFC+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260707120000&enddatetime=20260707180000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "HDFCBANK",
+    "start": "2026-07-07T18:00:00+00:00",
+    "end": "2026-07-08T00:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=HDFC+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260707180000&enddatetime=20260708000000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "HDFCBANK",
+    "start": "2026-07-08T06:00:00+00:00",
+    "end": "2026-07-08T12:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=HDFC+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260708060000&enddatetime=20260708120000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "HDFCBANK",
+    "start": "2026-07-09T12:00:00+00:00",
+    "end": "2026-07-09T18:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=HDFC+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260709120000&enddatetime=20260709180000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "HDFCBANK",
+    "start": "2026-07-10T00:00:00+00:00",
+    "end": "2026-07-10T06:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=HDFC+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260710000000&enddatetime=20260710060000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "HDFCBANK",
+    "start": "2026-07-10T06:00:00+00:00",
+    "end": "2026-07-10T12:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=HDFC+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260710060000&enddatetime=20260710120000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "HDFCBANK",
+    "start": "2026-07-10T12:00:00+00:00",
+    "end": "2026-07-10T18:00:00+00:00",
+    "error_type": "ReadTimeout",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Read timed out. (read timeout=30)"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "HDFCBANK",
+    "start": "2026-07-10T18:00:00+00:00",
+    "end": "2026-07-11T00:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=HDFC+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260710180000&enddatetime=20260711000000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "HDFCBANK",
+    "start": "2026-07-11T00:00:00+00:00",
+    "end": "2026-07-11T06:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=HDFC+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260711000000&enddatetime=20260711060000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "INFY",
+    "start": "2026-07-01T12:00:00+00:00",
+    "end": "2026-07-01T18:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Infosys&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260701120000&enddatetime=20260701180000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "INFY",
+    "start": "2026-07-01T18:00:00+00:00",
+    "end": "2026-07-02T00:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Infosys&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260701180000&enddatetime=20260702000000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "INFY",
+    "start": "2026-07-02T06:00:00+00:00",
+    "end": "2026-07-02T12:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Infosys&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260702060000&enddatetime=20260702120000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "INFY",
+    "start": "2026-07-02T12:00:00+00:00",
+    "end": "2026-07-02T18:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Infosys&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260702120000&enddatetime=20260702180000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "INFY",
+    "start": "2026-07-02T18:00:00+00:00",
+    "end": "2026-07-03T00:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Infosys&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260702180000&enddatetime=20260703000000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "INFY",
+    "start": "2026-07-03T00:00:00+00:00",
+    "end": "2026-07-03T06:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Infosys&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260703000000&enddatetime=20260703060000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "INFY",
+    "start": "2026-07-03T12:00:00+00:00",
+    "end": "2026-07-03T18:00:00+00:00",
+    "error_type": "ConnectTimeout",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Max retries exceeded with url: /api/v2/doc/doc?query=Infosys&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260703120000&enddatetime=20260703180000 (Caused by ConnectTimeoutError(<HTTPSConnection(host='api.gdeltproject.org', port=443) at 0x24c699079d0>, 'Connection to api.gdeltproject.org timed out. (connect timeout=30)'))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "INFY",
+    "start": "2026-07-03T18:00:00+00:00",
+    "end": "2026-07-04T00:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Infosys&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260703180000&enddatetime=20260704000000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "INFY",
+    "start": "2026-07-05T00:00:00+00:00",
+    "end": "2026-07-05T06:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Infosys&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260705000000&enddatetime=20260705060000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "INFY",
+    "start": "2026-07-05T12:00:00+00:00",
+    "end": "2026-07-05T18:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Infosys&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260705120000&enddatetime=20260705180000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "INFY",
+    "start": "2026-07-05T18:00:00+00:00",
+    "end": "2026-07-06T00:00:00+00:00",
+    "error_type": "ReadTimeout",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Read timed out. (read timeout=30)"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "INFY",
+    "start": "2026-07-06T12:00:00+00:00",
+    "end": "2026-07-06T18:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Infosys&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260706120000&enddatetime=20260706180000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "INFY",
+    "start": "2026-07-06T18:00:00+00:00",
+    "end": "2026-07-07T00:00:00+00:00",
+    "error_type": "ConnectTimeout",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Max retries exceeded with url: /api/v2/doc/doc?query=Infosys&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260706180000&enddatetime=20260707000000 (Caused by ConnectTimeoutError(<HTTPSConnection(host='api.gdeltproject.org', port=443) at 0x24c69976710>, 'Connection to api.gdeltproject.org timed out. (connect timeout=30)'))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "INFY",
+    "start": "2026-07-07T00:00:00+00:00",
+    "end": "2026-07-07T06:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Infosys&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260707000000&enddatetime=20260707060000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "INFY",
+    "start": "2026-07-07T06:00:00+00:00",
+    "end": "2026-07-07T12:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Infosys&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260707060000&enddatetime=20260707120000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "INFY",
+    "start": "2026-07-07T18:00:00+00:00",
+    "end": "2026-07-08T00:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Infosys&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260707180000&enddatetime=20260708000000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "INFY",
+    "start": "2026-07-08T06:00:00+00:00",
+    "end": "2026-07-08T12:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Infosys&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260708060000&enddatetime=20260708120000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "INFY",
+    "start": "2026-07-10T12:00:00+00:00",
+    "end": "2026-07-10T18:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Infosys&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260710120000&enddatetime=20260710180000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "ICICIBANK",
+    "start": "2026-07-01T12:00:00+00:00",
+    "end": "2026-07-01T18:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=ICICI+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260701120000&enddatetime=20260701180000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "ICICIBANK",
+    "start": "2026-07-02T06:00:00+00:00",
+    "end": "2026-07-02T12:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=ICICI+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260702060000&enddatetime=20260702120000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "ICICIBANK",
+    "start": "2026-07-02T12:00:00+00:00",
+    "end": "2026-07-02T18:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=ICICI+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260702120000&enddatetime=20260702180000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "ICICIBANK",
+    "start": "2026-07-03T00:00:00+00:00",
+    "end": "2026-07-03T06:00:00+00:00",
+    "error_type": "ConnectTimeout",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Max retries exceeded with url: /api/v2/doc/doc?query=ICICI+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260703000000&enddatetime=20260703060000 (Caused by ConnectTimeoutError(<HTTPSConnection(host='api.gdeltproject.org', port=443) at 0x24c69907110>, 'Connection to api.gdeltproject.org timed out. (connect timeout=30)'))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "ICICIBANK",
+    "start": "2026-07-03T18:00:00+00:00",
+    "end": "2026-07-04T00:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=ICICI+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260703180000&enddatetime=20260704000000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "ICICIBANK",
+    "start": "2026-07-04T00:00:00+00:00",
+    "end": "2026-07-04T06:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=ICICI+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260704000000&enddatetime=20260704060000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "ICICIBANK",
+    "start": "2026-07-04T06:00:00+00:00",
+    "end": "2026-07-04T12:00:00+00:00",
+    "error_type": "ReadTimeout",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Read timed out. (read timeout=30)"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "ICICIBANK",
+    "start": "2026-07-04T12:00:00+00:00",
+    "end": "2026-07-04T18:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=ICICI+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260704120000&enddatetime=20260704180000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "ICICIBANK",
+    "start": "2026-07-05T00:00:00+00:00",
+    "end": "2026-07-05T06:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=ICICI+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260705000000&enddatetime=20260705060000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "ICICIBANK",
+    "start": "2026-07-05T12:00:00+00:00",
+    "end": "2026-07-05T18:00:00+00:00",
+    "error_type": "ConnectTimeout",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Max retries exceeded with url: /api/v2/doc/doc?query=ICICI+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260705120000&enddatetime=20260705180000 (Caused by ConnectTimeoutError(<HTTPSConnection(host='api.gdeltproject.org', port=443) at 0x24c69907750>, 'Connection to api.gdeltproject.org timed out. (connect timeout=30)'))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "ICICIBANK",
+    "start": "2026-07-06T06:00:00+00:00",
+    "end": "2026-07-06T12:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=ICICI+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260706060000&enddatetime=20260706120000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "ICICIBANK",
+    "start": "2026-07-07T06:00:00+00:00",
+    "end": "2026-07-07T12:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=ICICI+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260707060000&enddatetime=20260707120000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "ICICIBANK",
+    "start": "2026-07-08T00:00:00+00:00",
+    "end": "2026-07-08T06:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=ICICI+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260708000000&enddatetime=20260708060000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "ICICIBANK",
+    "start": "2026-07-08T18:00:00+00:00",
+    "end": "2026-07-09T00:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=ICICI+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260708180000&enddatetime=20260709000000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "ICICIBANK",
+    "start": "2026-07-09T12:00:00+00:00",
+    "end": "2026-07-09T18:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=ICICI+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260709120000&enddatetime=20260709180000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "ICICIBANK",
+    "start": "2026-07-10T06:00:00+00:00",
+    "end": "2026-07-10T12:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=ICICI+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260710060000&enddatetime=20260710120000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "ICICIBANK",
+    "start": "2026-07-10T18:00:00+00:00",
+    "end": "2026-07-11T00:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=ICICI+Bank&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260710180000&enddatetime=20260711000000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-01T18:00:00+00:00",
+    "end": "2026-07-02T00:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260701180000&enddatetime=20260702000000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-03T00:00:00+00:00",
+    "end": "2026-07-03T06:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260703000000&enddatetime=20260703060000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-03T12:00:00+00:00",
+    "end": "2026-07-03T18:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260703120000&enddatetime=20260703180000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-04T00:00:00+00:00",
+    "end": "2026-07-04T06:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260704000000&enddatetime=20260704060000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-04T12:00:00+00:00",
+    "end": "2026-07-04T18:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260704120000&enddatetime=20260704180000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-05T00:00:00+00:00",
+    "end": "2026-07-05T06:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260705000000&enddatetime=20260705060000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-06T18:00:00+00:00",
+    "end": "2026-07-07T00:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260706180000&enddatetime=20260707000000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-09T00:00:00+00:00",
+    "end": "2026-07-09T06:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260709000000&enddatetime=20260709060000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-11T00:00:00+00:00",
+    "end": "2026-07-11T06:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260711000000&enddatetime=20260711060000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-18T00:00:00+00:00",
+    "end": "2026-07-18T06:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260718000000&enddatetime=20260718060000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-18T06:00:00+00:00",
+    "end": "2026-07-18T12:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260718060000&enddatetime=20260718120000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-19T06:00:00+00:00",
+    "end": "2026-07-19T12:00:00+00:00",
+    "error_type": "ConnectTimeout",
+    "error": "HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Max retries exceeded with url: /api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260719060000&enddatetime=20260719120000 (Caused by ConnectTimeoutError(<HTTPSConnection(host='api.gdeltproject.org', port=443) at 0x2baae296fd0>, 'Connection to api.gdeltproject.org timed out. (connect timeout=30)'))"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-21T06:00:00+00:00",
+    "end": "2026-07-21T12:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260721060000&enddatetime=20260721120000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-21T12:00:00+00:00",
+    "end": "2026-07-21T18:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260721120000&enddatetime=20260721180000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-21T18:00:00+00:00",
+    "end": "2026-07-22T00:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260721180000&enddatetime=20260722000000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-22T06:00:00+00:00",
+    "end": "2026-07-22T12:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260722060000&enddatetime=20260722120000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-23T00:00:00+00:00",
+    "end": "2026-07-23T06:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260723000000&enddatetime=20260723060000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-23T06:00:00+00:00",
+    "end": "2026-07-23T12:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260723060000&enddatetime=20260723120000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-24T00:00:00+00:00",
+    "end": "2026-07-24T06:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260724000000&enddatetime=20260724060000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-26T00:00:00+00:00",
+    "end": "2026-07-26T06:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260726000000&enddatetime=20260726060000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-26T18:00:00+00:00",
+    "end": "2026-07-27T00:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260726180000&enddatetime=20260727000000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-27T06:00:00+00:00",
+    "end": "2026-07-27T12:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260727060000&enddatetime=20260727120000"
+  },
+  {
+    "provider": "gdelt",
+    "asset": "TCS",
+    "start": "2026-07-29T12:00:00+00:00",
+    "end": "2026-07-29T18:00:00+00:00",
+    "error_type": "HTTPError",
+    "error": "429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=Tata+Consultancy+Services&mode=artlist&format=json&maxrecords=250&sort=datedesc&startdatetime=20260729120000&enddatetime=20260729180000"
   }
 ]

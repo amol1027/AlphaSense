@@ -1,0 +1,10 @@
+:root{
+  color-scheme:light;
+  --bg:#F3F0E8;--ink:#16150F;--muted:#6B675C;--hairline:#D9D4C7;
+  --accent:#E5462B;--teal:#3E7C74;
+  --serif:'Newsreader',Georgia,serif;--sans:'Instrument Sans',Arial,sans-serif;--mono:'IBM Plex Mono','Courier New',monospace;
+  --ease:cubic-bezier(.22,1,.36,1);--fast:160ms;--base:400ms;--slow:900ms;
+  font-synthesis:none;text-rendering:optimizeLegibility;
+}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0F0E0B;--ink:#EDE9DD;--muted:#A29C8E;--hairline:#38352D;--accent:#F05A40;--teal:#78A99F}
+@media(prefers-color-scheme:dark){:root:not([data-theme]){color-scheme:dark;--bg:#0F0E0B;--ink:#EDE9DD;--muted:#A29C8E;--hairline:#38352D;--accent:#F05A40;--teal:#78A99F}}

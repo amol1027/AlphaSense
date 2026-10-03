@@ -8,6 +8,9 @@ MARKET_DIR = Path("data/raw/market")
 INPUTS = [
     MARKET_DIR / "phase1_tcs_15m.csv",
     MARKET_DIR / "phase1_reliance_15m.csv",
+    MARKET_DIR / "phase1_hdfcbank_15m.csv",
+    MARKET_DIR / "phase1_infy_15m.csv",
+    MARKET_DIR / "phase1_icicibank_15m.csv",
 ]
 
 OUTPUT = MARKET_DIR / "phase1_research_market_15m.csv"

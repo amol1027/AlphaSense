@@ -164,3 +164,48 @@ def fetch_historical_candles(
         .sort_values("timestamp")
         .reset_index(drop=True)
     )
+
+
+def fetch_intraday_candles(
+    instrument_key: str,
+    interval_minutes: int = 15,
+) -> pd.DataFrame:
+    """Fetch today's candles from Upstox V3 for a live shadow run."""
+    if not 1 <= interval_minutes <= 300:
+        raise ValueError("interval_minutes must be between 1 and 300.")
+
+    access_token = os.getenv("UPSTOX_ACCESS_TOKEN")
+    if not access_token:
+        raise ValueError("UPSTOX_ACCESS_TOKEN is not set.")
+
+    url = (
+        f"{BASE_URL}/historical-candle/intraday/{instrument_key}"
+        f"/minutes/{interval_minutes}"
+    )
+    response = requests.get(
+        url,
+        headers={
+            "Accept": "application/json",
+            "Authorization": f"Bearer {access_token}",
+        },
+        timeout=30,
+    )
+    response.raise_for_status()
+    try:
+        candles = response.json()["data"]["candles"]
+    except (KeyError, TypeError) as exc:
+        raise ValueError("Unexpected Upstox intraday candle response.") from exc
+
+    rows = []
+    for candle in candles:
+        if len(candle) < 6:
+            raise ValueError("Malformed candle returned by Upstox.")
+        rows.append(dict(zip(OUTPUT_COLUMNS, candle[:6])))
+    if not rows:
+        return pd.DataFrame(columns=OUTPUT_COLUMNS)
+
+    df = pd.DataFrame(rows)
+    df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True)
+    for column in OUTPUT_COLUMNS[1:]:
+        df[column] = pd.to_numeric(df[column], errors="raise")
+    return df.sort_values("timestamp").reset_index(drop=True)

@@ -1,0 +1,20 @@
+# AlphaSense volatility API + webapp host (:8000).
+# Install: copy to /etc/systemd/system/, adjust User/WorkingDirectory/EnvironmentFile,
+# then `systemctl daemon-reload && systemctl enable --now alphasense-prediction`.
+[Unit]
+Description=AlphaSense volatility API and webapp
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=alphasense
+WorkingDirectory=/opt/alphasense
+EnvironmentFile=/opt/alphasense/.env
+ExecStart=/opt/alphasense/.venv/bin/python -m src.prediction.server
+Restart=on-failure
+RestartSec=5
+# Readiness: GET http://127.0.0.1:8000/health -> 200 (503 while degraded)
+
+[Install]
+WantedBy=multi-user.target

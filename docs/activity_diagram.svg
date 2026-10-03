@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1900" viewBox="0 0 1500 1900" role="img" aria-labelledby="title desc">
+  <title id="title">AlphaSense market prediction activity diagram</title>
+  <desc id="desc">UML activity diagram with User, AlphaSense System, and Data Providers swimlanes. It shows authenticated prediction request, validation, parallel market/news/social data collection, feature snapshot construction, model inference, result persistence, dashboard display, and failure paths.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="10" refX="10" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#334155"/></marker>
+    <style>
+      text{font-family:Segoe UI,Arial,sans-serif;fill:#172033}.lane{fill:#f8fafc;stroke:#94a3b8;stroke-width:2}.lanehead{fill:#e2e8f0;stroke:#94a3b8;stroke-width:2}.action{fill:#fff;stroke:#2563eb;stroke-width:2}.error{fill:#fff7ed;stroke:#ea580c;stroke-width:2}.decision{fill:#fff;stroke:#475569;stroke-width:2}.flow{fill:none;stroke:#334155;stroke-width:2.4;marker-end:url(#arrow)}.plain{fill:none;stroke:#334155;stroke-width:2.4}.fork{fill:#334155;stroke:#334155}.title{font-size:27px;font-weight:700}.laneTitle{font-size:18px;font-weight:700}.label{font-size:16px}.small{font-size:14px;fill:#475569}.guard{font-size:14px;font-weight:600;fill:#334155}.node{fill:#111827}.finalOuter{fill:#fff;stroke:#111827;stroke-width:3}.finalInner{fill:#111827}
+    </style>
+  </defs>
+  <rect width="1500" height="1900" fill="#ffffff"/>
+  <text x="750" y="48" text-anchor="middle" class="title">AlphaSense — Request Next-Hour Prediction</text>
+  <text x="750" y="76" text-anchor="middle" class="small">NSE/BSE equity workflow · feature information cutoff at prediction time · market session in IST</text>
+
+  <!-- Three UML swimlanes -->
+  <rect x="40" y="110" width="300" height="1730" class="lane"/><rect x="40" y="110" width="300" height="54" class="lanehead"/>
+  <rect x="340" y="110" width="760" height="1730" class="lane"/><rect x="340" y="110" width="760" height="54" class="lanehead"/>
+  <rect x="1100" y="110" width="360" height="1730" class="lane"/><rect x="1100" y="110" width="360" height="54" class="lanehead"/>
+  <text x="190" y="145" text-anchor="middle" class="laneTitle">User</text><text x="720" y="145" text-anchor="middle" class="laneTitle">AlphaSense System</text><text x="1280" y="145" text-anchor="middle" class="laneTitle">Data Providers</text>
+
+  <!-- start and request -->
+  <circle cx="190" cy="205" r="10" class="node"/>
+  <path d="M190 215 V250" class="flow"/>
+  <rect x="90" y="255" width="200" height="68" rx="16" class="action"/><text x="190" y="282" text-anchor="middle" class="label"><tspan x="190">Log in</tspan><tspan x="190" dy="21">and open dashboard</tspan></text>
+  <path d="M190 323 V360" class="flow"/>
+  <rect x="80" y="365" width="220" height="78" rx="16" class="action"/><text x="190" y="394" text-anchor="middle" class="label"><tspan x="190">Select NSE/BSE asset</tspan><tspan x="190" dy="21">and request prediction</tspan></text>
+  <path d="M300 404 H420" class="flow"/>
+
+  <!-- validation -->
+  <rect x="445" y="370" width="250" height="68" rx="16" class="action"/><text x="570" y="397" text-anchor="middle" class="label"><tspan x="570">Validate asset, exchange,</tspan><tspan x="570" dy="21">and prediction timestamp</tspan></text>
+  <path d="M570 438 V478" class="flow"/>
+  <path d="M570 478 L635 530 L570 582 L505 530 Z" class="decision"/><text x="570" y="525" text-anchor="middle" class="label"><tspan x="570">Valid trading</tspan><tspan x="570" dy="19">session and</tspan><tspan x="570" dy="19">timestamp?</tspan></text>
+  <path d="M505 530 H415 V1580 H460" class="flow"/><text x="429" y="514" class="guard">[No]</text>
+  <rect x="465" y="1545" width="250" height="70" rx="16" class="error"/><text x="590" y="1573" text-anchor="middle" class="label"><tspan x="590">Reject request and</tspan><tspan x="590" dy="21">show validation reason</tspan></text>
+  <path d="M590 1615 V1670" class="flow"/><circle cx="590" cy="1694" r="15" class="finalOuter"/><circle cx="590" cy="1694" r="8" class="finalInner"/>
+
+  <!-- fork for data collection -->
+  <path d="M570 582 V635" class="flow"/><text x="584" y="614" class="guard">[Yes]</text>
+  <rect x="450" y="635" width="520" height="12" rx="3" class="fork"/>
+  <path d="M490 647 V700 H1215" class="plain"/><path d="M710 647 V700" class="plain"/><path d="M930 647 V700 H1215" class="plain"/>
+  <path d="M1215 700 V735" class="flow"/><path d="M710 700 V735" class="flow"/><path d="M490 700 V735" class="flow"/>
+  <rect x="390" y="740" width="200" height="78" rx="16" class="action"/><text x="490" y="769" text-anchor="middle" class="label"><tspan x="490">Load market bars</tspan><tspan x="490" dy="21">and validate coverage</tspan></text>
+  <rect x="610" y="740" width="200" height="78" rx="16" class="action"/><text x="710" y="769" text-anchor="middle" class="label"><tspan x="710">Load news and</tspan><tspan x="710" dy="21">compute FinBERT sentiment</tspan></text>
+  <rect x="1115" y="740" width="200" height="78" rx="16" class="action"/><text x="1215" y="769" text-anchor="middle" class="label"><tspan x="1215">Load Reddit/social</tspan><tspan x="1215" dy="21">posts and features</tspan></text>
+  <!-- external sources -->
+  <path d="M490 740 V680 H1135 V620" class="flow"/><text x="1143" y="650" class="small">Market data source</text>
+  <path d="M710 740 V670 H1320 V620" class="flow"/><text x="1325" y="650" class="small">News / sentiment</text>
+  <path d="M1215 740 V620" class="flow"/><text x="1228" y="610" class="small">Social source</text>
+
+  <!-- join -->
+  <path d="M490 818 V860 H710" class="plain"/><path d="M710 818 V860" class="plain"/><path d="M1215 818 V860 H710" class="plain"/>
+  <rect x="450" y="860" width="520" height="12" rx="3" class="fork"/>
+  <path d="M710 872 V910" class="flow"/>
+  <rect x="550" y="915" width="320" height="86" rx="16" class="action"/><text x="710" y="945" text-anchor="middle" class="label"><tspan x="710">Build feature snapshot</tspan><tspan x="710" dy="22">align at t; use only information</tspan><tspan x="710" dy="20">available by prediction time</tspan></text>
+  <path d="M710 1001 V1040" class="flow"/>
+  <path d="M710 1040 L790 1098 L710 1156 L630 1098 Z" class="decision"/><text x="710" y="1092" text-anchor="middle" class="label"><tspan x="710">Snapshot valid and</tspan><tspan x="710" dy="20">required features</tspan><tspan x="710" dy="20">available?</tspan></text>
+  <path d="M790 1098 H1015 V1430 H870" class="flow"/><text x="807" y="1083" class="guard">[No]</text>
+  <rect x="590" y="1395" width="280" height="70" rx="16" class="error"/><text x="730" y="1423" text-anchor="middle" class="label"><tspan x="730">Return unavailable-data</tspan><tspan x="730" dy="21">message to dashboard</tspan></text>
+  <path d="M730 1465 V1510" class="flow"/><circle cx="730" cy="1534" r="15" class="finalOuter"/><circle cx="730" cy="1534" r="8" class="finalInner"/>
+
+  <!-- inference and result -->
+  <path d="M710 1156 V1200" class="flow"/><text x="725" y="1185" class="guard">[Yes]</text>
+  <rect x="570" y="1205" width="280" height="72" rx="16" class="action"/><text x="710" y="1234" text-anchor="middle" class="label"><tspan x="710">Apply trained prediction model</tspan><tspan x="710" dy="21">and calculate class probabilities</tspan></text>
+  <path d="M850 1241 H930 V1300" class="flow"/>
+  <rect x="835" y="1305" width="230" height="76" rx="16" class="action"/><text x="950" y="1335" text-anchor="middle" class="label"><tspan x="950">Save prediction and</tspan><tspan x="950" dy="21">feature snapshot</tspan></text>
+  <path d="M950 1381 V1436 H850" class="flow"/>
+  <rect x="570" y="1400" width="280" height="72" rx="16" class="action"/><text x="710" y="1429" text-anchor="middle" class="label"><tspan x="710">Return result to dashboard</tspan><tspan x="710" dy="21">for selected asset</tspan></text>
+  <path d="M570 1436 H190 V1480" class="flow"/>
+  <rect x="75" y="1485" width="230" height="76" rx="16" class="action"/><text x="190" y="1515" text-anchor="middle" class="label"><tspan x="190">Review prediction</tspan><tspan x="190" dy="21">and probabilities</tspan></text>
+  <path d="M190 1561 V1600" class="flow"/>
+  <circle cx="190" cy="1624" r="15" class="finalOuter"/><circle cx="190" cy="1624" r="8" class="finalInner"/>
+  <text x="190" y="1660" text-anchor="middle" class="small">Activity complete</text>
+
+  <!-- note -->
+  <rect x="885" y="1710" width="535" height="92" rx="8" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+  <text x="905" y="1738" class="small"><tspan x="905">Model target: next-hour movement. Future market values are used</tspan><tspan x="905" dy="20">only for offline target construction, never as prediction inputs.</tspan><tspan x="905" dy="20">Parallel bar and diamond represent UML fork/join and decision nodes.</tspan></text>
+</svg>

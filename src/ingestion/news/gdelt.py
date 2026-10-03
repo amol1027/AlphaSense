@@ -14,6 +14,9 @@ GDELT_NEWS_URL = (
 GDELT_QUERIES = {
     "TCS": "Tata Consultancy Services",
     "RELIANCE": "Reliance Industries",
+    "HDFCBANK": "HDFC Bank",
+    "INFY": "Infosys",
+    "ICICIBANK": "ICICI Bank",
 }
 
 

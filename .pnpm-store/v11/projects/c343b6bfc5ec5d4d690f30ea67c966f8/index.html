@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f3f0e8" />
+    <meta name="description" content="AlphaSense studies short-horizon NSE/BSE market behavior with time-aligned market and news signals." />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="AlphaSense — Market behavior, in time" />
+    <meta property="og:description" content="Range regime outperformed direction across 130 held-out folds. Exploratory NSE research, not investment advice." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='1.5' y='1.5' width='29' height='29' fill='none' stroke='%2316150F' stroke-width='2'/%3E%3Ctext x='16' y='14' text-anchor='middle' font-family='Georgia,serif' font-size='11' fill='%2316150F'%3EA%3C/text%3E%3Ctext x='16' y='26' text-anchor='middle' font-family='Georgia,serif' font-size='11' fill='%2316150F'%3ES%3C/text%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet" />
+    <title>AlphaSense — Market behavior, in time</title>
+    <script>
+      // Apply the saved theme before first paint so the page never flashes.
+      // Mirrors the logic in src/theme.ts: stored choice wins, else OS.
+      try {
+        var saved = window.localStorage.getItem('alphasense-theme');
+        var dark = saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      } catch (e) { /* defaults from CSS apply */ }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

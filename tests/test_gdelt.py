@@ -75,7 +75,7 @@ def test_gdelt_rejects_unknown_asset():
     client = GDELTNewsClient()
 
     try:
-        client.fetch_news("INFY")
+        client.fetch_news("UNKNOWN_ASSET")
         assert False
     except ValueError as exc:
         assert "Unsupported asset" in str(exc)

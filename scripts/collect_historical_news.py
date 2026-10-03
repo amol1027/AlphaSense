@@ -35,6 +35,9 @@ END_DATE = datetime(
 ASSETS = [
     "TCS",
     "RELIANCE",
+    "HDFCBANK",
+    "INFY",
+    "ICICIBANK",
 ]
 
 OUTPUT_PATH = (
