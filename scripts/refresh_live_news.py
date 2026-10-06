@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import logging
 import sys
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -42,6 +43,12 @@ UPSTOX_PAGE_SIZE = 10
 GDELT_MAX_RECORDS = 25
 
 
+# Live-refresh budget per provider call. /refresh must stay interactive even
+# when an external news API stalls: each call fails fast and is recorded in
+# provider_errors instead of holding the refresh lock for minutes.
+LIVE_TIMEOUT_SECONDS = 12
+
+
 def _build_clients() -> tuple[dict[str, object], dict[str, str]]:
     """Instantiate provider clients best-effort; missing tokens => error entry."""
     clients: dict[str, object] = {}
@@ -50,21 +57,23 @@ def _build_clients() -> tuple[dict[str, object], dict[str, str]]:
     try:
         from src.ingestion.news.gdelt import GDELTNewsClient
 
-        clients["gdelt"] = GDELTNewsClient()
+        clients["gdelt"] = GDELTNewsClient(
+            timeout=LIVE_TIMEOUT_SECONDS, max_retries=1, backoff_seconds=2
+        )
     except Exception as exc:  # pragma: no cover - init rarely fails
         errors["gdelt_init"] = str(exc)
 
     try:
         from src.ingestion.news.marketaux import MarketauxClient
 
-        clients["marketaux"] = MarketauxClient()
+        clients["marketaux"] = MarketauxClient(timeout=LIVE_TIMEOUT_SECONDS)
     except Exception as exc:
         errors["marketaux_init"] = str(exc)
 
     try:
         from src.ingestion.news.upstox import UpstoxNewsClient
 
-        clients["upstox"] = UpstoxNewsClient()
+        clients["upstox"] = UpstoxNewsClient(timeout=LIVE_TIMEOUT_SECONDS)
     except Exception as exc:
         errors["upstox_init"] = str(exc)
 
@@ -117,8 +126,12 @@ def refresh() -> dict:
 
     fresh_rows: list[dict] = []
     fresh_count = 0
-    for asset in ASSETS:
-        articles, errors = _fetch_for_asset(asset, clients)
+    # I/O-bound provider calls run one asset per thread so a single stalled
+    # provider delays the refresh once, not once per asset. Results are merged
+    # back in ASSETS order to keep the cache deterministic.
+    with ThreadPoolExecutor(max_workers=len(ASSETS)) as pool:
+        fetched = list(pool.map(lambda asset: _fetch_for_asset(asset, clients), ASSETS))
+    for articles, errors in fetched:
         provider_errors.update(errors)
         fresh_count += len(articles)
         for article in articles:
