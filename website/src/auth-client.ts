@@ -73,17 +73,25 @@ export async function signOut(): Promise<void> {
   if (!response.ok) throw await readError(response)
 }
 
-export async function updateDisplayName(displayName: string): Promise<AuthUser> {
+export async function updateProfile(patch: { display_name?: string; email?: string }): Promise<AuthUser> {
   csrfRequest = null
   const csrfToken = await getCsrfToken()
   const response = await fetch(`${apiBase}/api/auth/me`, {
     method: 'PATCH',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
-    body: JSON.stringify({ display_name: displayName }),
+    body: JSON.stringify(patch),
   })
   if (!response.ok) throw await readError(response)
   return await response.json() as AuthUser
+}
+
+export async function updateDisplayName(displayName: string): Promise<AuthUser> {
+  return updateProfile({ display_name: displayName })
+}
+
+export async function updateEmail(email: string): Promise<AuthUser> {
+  return updateProfile({ email })
 }
 
 export async function changePassword(currentPassword: string, newPassword: string): Promise<void> {

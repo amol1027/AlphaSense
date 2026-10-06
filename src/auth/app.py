@@ -136,19 +136,43 @@ class Registration(Credentials):
 
 
 class DisplayNameUpdate(BaseModel):
-    """Self-service display-name edit (same normalization as registration)."""
+    """Self-service profile edit: display name and/or email.
+
+    Both fields are optional so the profile page can edit them
+    independently, but at least one must be present. Email is
+    normalized the same way as login/registration (lowercased).
+    """
 
     model_config = ConfigDict(extra="forbid")
 
-    display_name: str = Field(min_length=1, max_length=80)
+    display_name: str | None = Field(default=None, min_length=1, max_length=80)
+    email: str | None = Field(default=None, min_length=3, max_length=254)
 
     @field_validator("display_name")
     @classmethod
-    def normalize_display_name(cls, value: str) -> str:
+    def normalize_display_name(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
         value = " ".join(value.split())
         if not value:
             raise ValueError("Enter your name")
         return value
+
+    @field_validator("email")
+    @classmethod
+    def normalize_email(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        normalized = value.strip().lower()
+        if not EMAIL_PATTERN.fullmatch(normalized):
+            raise ValueError("Enter a valid email address")
+        return normalized
+
+    @model_validator(mode="after")
+    def require_at_least_one_field(self):
+        if self.display_name is None and self.email is None:
+            raise ValueError("Provide a name or email to update")
+        return self
 
 
 class PasswordChange(BaseModel):
@@ -427,11 +451,31 @@ def update_me(payload: DisplayNameUpdate, request: Request) -> dict:
     user = _current_user(request)
     if not user:
         raise HTTPException(status_code=401, detail="Not signed in")
-    database.execute(
-        "UPDATE users SET display_name = %s WHERE id = %s",
-        (payload.display_name, user["id"]),
-    )
-    return {"id": user["id"], "email": user["email"], "displayName": payload.display_name, "role": user.get("role", "user")}
+    updates: dict[str, str] = {}
+    if payload.display_name is not None:
+        updates["display_name"] = payload.display_name
+    new_email = payload.email
+    if new_email is not None and new_email != user["email"]:
+        existing = database.fetch_one("SELECT id FROM users WHERE email = %s", (new_email,))
+        if existing and int(existing["id"]) != int(user["id"]):
+            raise HTTPException(status_code=409, detail="An account with that email already exists")
+        updates["email"] = new_email
+    if not updates:
+        return {"id": user["id"], "email": user["email"], "displayName": user["display_name"], "role": user.get("role", "user")}
+    try:
+        set_clause = ", ".join(f"{column} = %s" for column in updates)
+        database.execute(
+            f"UPDATE users SET {set_clause} WHERE id = %s",
+            (*updates.values(), user["id"]),
+        )
+    except IntegrityError as exc:
+        raise HTTPException(status_code=409, detail="An account with that email already exists") from exc
+    return {
+        "id": user["id"],
+        "email": updates.get("email", user["email"]),
+        "displayName": updates.get("display_name", user["display_name"]),
+        "role": user.get("role", "user"),
+    }
 
 
 @app.post("/api/auth/me/password")

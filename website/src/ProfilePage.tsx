@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { ArrowRight, ArrowUpRight, KeyRound, Mail, MessageCircle, ShieldCheck, Star, UserRound } from 'lucide-react'
-import { changePassword, getNotificationPrefs, updateDisplayName, updateNotificationPrefs, type AuthUser } from './auth-client'
+import { changePassword, getNotificationPrefs, updateDisplayName, updateEmail, updateNotificationPrefs, type AuthUser } from './auth-client'
 import './profile.css'
 
 type ProfilePageProps = {
@@ -75,6 +75,11 @@ export function ProfilePage({ user, onNavigate, onUserChange }: ProfilePageProps
   const [name, setName] = useState(user.displayName)
   const [nameBusy, setNameBusy] = useState(false)
   const [nameError, setNameError] = useState('')
+  const [nameSaved, setNameSaved] = useState(false)
+  const [emailAddress, setEmailAddress] = useState(user.email)
+  const [emailBusy, setEmailBusy] = useState(false)
+  const [emailError, setEmailError] = useState('')
+  const [emailSaved, setEmailSaved] = useState(false)
   const [passwordBusy, setPasswordBusy] = useState(false)
   const [passwordError, setPasswordError] = useState('')
   const [passwordSaved, setPasswordSaved] = useState(false)
@@ -108,6 +113,14 @@ export function ProfilePage({ user, onNavigate, onUserChange }: ProfilePageProps
       .catch(() => { if (active) setMarketsDown(true) })
     return () => { active = false }
   }, [])
+
+  useEffect(() => {
+    setName(user.displayName)
+  }, [user.displayName])
+
+  useEffect(() => {
+    setEmailAddress(user.email)
+  }, [user.email])
 
   useEffect(() => {
     let active = true
@@ -144,6 +157,7 @@ export function ProfilePage({ user, onNavigate, onUserChange }: ProfilePageProps
   async function submitName(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setNameError('')
+    setNameSaved(false)
     const trimmed = name.trim()
     if (!trimmed) {
       setNameError('Enter your name.')
@@ -154,10 +168,37 @@ export function ProfilePage({ user, onNavigate, onUserChange }: ProfilePageProps
       const updated = await updateDisplayName(trimmed)
       onUserChange(updated)
       setName(updated.displayName)
+      setNameSaved(true)
     } catch (reason) {
       setNameError(reason instanceof Error ? reason.message : 'We could not save that name. Please try again.')
     } finally {
       setNameBusy(false)
+    }
+  }
+
+  async function submitEmail(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setEmailError('')
+    setEmailSaved(false)
+    const trimmed = emailAddress.trim()
+    if (!trimmed) {
+      setEmailError('Enter your email address.')
+      return
+    }
+    if (trimmed.toLowerCase() === user.email.toLowerCase()) {
+      setEmailError('That is already your sign-in email.')
+      return
+    }
+    setEmailBusy(true)
+    try {
+      const updated = await updateEmail(trimmed)
+      onUserChange(updated)
+      setEmailAddress(updated.email)
+      setEmailSaved(true)
+    } catch (reason) {
+      setEmailError(reason instanceof Error ? reason.message : 'We could not save that email. Please try again.')
+    } finally {
+      setEmailBusy(false)
     }
   }
 
@@ -294,7 +335,7 @@ export function ProfilePage({ user, onNavigate, onUserChange }: ProfilePageProps
     {/* ── Settings ───────────────────────────────────────────────── */}
     <section aria-labelledby="pf-settings-heading">
       <div className="pf-section-head">
-        <div><p className="pf-eyebrow">ACCOUNT SETTINGS</p><h2 id="pf-settings-heading">Name & password</h2></div>
+        <div><p className="pf-eyebrow">ACCOUNT SETTINGS</p><h2 id="pf-settings-heading">Name, email & password</h2></div>
       </div>
       <div className="pf-settings-grid">
         <form className="pf-setting-card" onSubmit={submitName} aria-label="Change display name">
@@ -302,7 +343,16 @@ export function ProfilePage({ user, onNavigate, onUserChange }: ProfilePageProps
           <p>Shown across the workspace and the top bar.</p>
           <label className="pf-field"><span>Name</span><input value={name} onChange={event => setName(event.target.value)} autoComplete="name" required maxLength={80} placeholder="Your name" /></label>
           {nameError && <p className="pf-error" role="alert">{nameError}</p>}
+          {nameSaved && <p className="pf-success" role="status">Name saved.</p>}
           <button className="pf-submit" type="submit" disabled={nameBusy}>{nameBusy ? 'Saving…' : 'Save name'}<ArrowRight size={14} /></button>
+        </form>
+        <form className="pf-setting-card" onSubmit={submitEmail} aria-label="Change email address">
+          <h3><Mail size={18} aria-hidden="true" />Email</h3>
+          <p>Used to sign in and receive regime reminders.</p>
+          <label className="pf-field"><span>Email</span><input value={emailAddress} onChange={event => setEmailAddress(event.target.value)} type="email" autoComplete="email" required maxLength={254} placeholder="you@example.com" /></label>
+          {emailError && <p className="pf-error" role="alert">{emailError}</p>}
+          {emailSaved && <p className="pf-success" role="status">Email updated. Use it next time you sign in.</p>}
+          <button className="pf-submit" type="submit" disabled={emailBusy}>{emailBusy ? 'Saving…' : 'Save email'}<ArrowRight size={14} /></button>
         </form>
         <form className="pf-setting-card" onSubmit={submitPassword} aria-label="Change password">
           <h3><KeyRound size={18} aria-hidden="true" />Password</h3>
