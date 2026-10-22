@@ -40,7 +40,7 @@ In the first terminal:
 .\.venv\Scripts\python.exe scripts/run_shadow.py
 ```
 
-The runner refreshes completed 15-minute candles about every 15 minutes, including a final cycle through 3:45 pm IST to capture the 3:15–3:30 pm candle. It labels outcomes once a full future hour is available and logs fresh predictions. The dashboard uses Upstox's market stream for live chart updates; its historical intraday candle endpoint supplies chart history. The local prediction cache retains a rolling seven days; the original research data remains unchanged. Leave this terminal running. Press **Ctrl+C** to stop it.
+The runner wakes just after each 15-minute bar boundary (plus a 2-minute completion delay), including a final cycle through 3:45 pm IST to capture the 3:15–3:30 pm candle. It labels outcomes once a full future hour is available and logs fresh predictions. The dashboard uses Upstox's market stream for live chart updates; its historical intraday candle endpoint supplies chart history. The local prediction cache retains a rolling seven days; the original research data remains unchanged. Leave this terminal running. Press **Ctrl+C** to stop it.
 
 The first refresh seeds the cache from the existing market files, then adds current Upstox candles. Predictions are logged only when the latest bar is no more than 45 minutes old. If the market is closed or no completed bars are available, the runner waits for its next cycle.
 

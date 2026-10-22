@@ -13,6 +13,7 @@ artifacts, and locked data are never touched.
 import logging
 import sys
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 
@@ -22,9 +23,21 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+IST = ZoneInfo("Asia/Kolkata")
 LOG_PATH = PROJECT_ROOT / "data/interim/live_log.csv"
 ASSETS = ("RELIANCE", "TCS", "HDFCBANK", "INFY", "ICICIBANK")
 MAX_BAR_AGE = pd.Timedelta(minutes=45)
+LAST_BAR_OPEN = pd.Timedelta(hours=15, minutes=15)
+LABEL_WINDOW = pd.Timedelta(hours=1)
+
+
+def label_window_completes(ts: pd.Timestamp) -> bool:
+    """Normal NSE session closes 15:30 IST; its final bar opens 15:15 IST."""
+    t_ist = pd.Timestamp(ts)
+    t_ist = t_ist.tz_localize("UTC") if t_ist.tzinfo is None else t_ist
+    t_ist = t_ist.tz_convert(IST)
+    last_bar_open = t_ist.normalize() + LAST_BAR_OPEN
+    return t_ist + LABEL_WINDOW <= last_bar_open
 
 
 def load_log() -> pd.DataFrame:
@@ -58,6 +71,13 @@ def cmd_log() -> int:
         age = now - pd.Timestamp(res["prediction_timestamp"])
         if age < pd.Timedelta(0) or age > MAX_BAR_AGE:
             logger.info("%s: skipped; latest bar is %s old", asset, age)
+            continue
+        if not label_window_completes(res["prediction_timestamp"]):
+            logger.info(
+                "%s: skipped; 1h label window would run past the session close (%s)",
+                asset,
+                res["prediction_timestamp"],
+            )
             continue
         key = pd.Timestamp(res["prediction_timestamp"])
         key = key.tz_localize("UTC") if key.tzinfo is None else key.tz_convert("UTC")
