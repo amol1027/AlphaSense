@@ -14,7 +14,7 @@
 
 **Phase 4 — Volatility-regime pilot: PASS (see `docs/phase_4_pilot.md`)**
 
-**Current test status: 343 passed, 11 warnings**
+**Current test status: 356 passed, 10 warnings**
 
 The project currently covers:
 
@@ -1096,6 +1096,22 @@ rather than serving stale bars.
 python scripts/check_upstox_token.py
 ```
 
+### `check_shadow_health.py`
+
+Daily self-check for the shadow run: Upstox token validity, cache freshness
+against the last trading session (from the NSE/BSE holiday calendar), and
+prediction-log coverage of that session's slots (alert below 50% of the
+expected rows, judged only after session close + 30 min). Failures print,
+optionally email `ALERT_EMAIL`/`SMTP_FROM` via SMTP, and exit 1. Special
+sessions are skipped for coverage (outside the prediction universe).
+
+```powershell
+python scripts/check_shadow_health.py
+```
+
+Return codes: exit 0 = healthy; exit 1 = failed check and an alert was
+attempted.
+
 ---
 
 # Development Principles
@@ -1240,7 +1256,7 @@ Phase 4 — PASS (range-regime volatility pilot: 130/130 folds, minimal 9-feat
 set frozen, 1h horizon frozen; news-on-top FAIL)
 
 Tests:
-343 passed, 11 warnings
+356 passed, 10 warnings
 
 Next:
 Run the frozen 9-feature, 1h volatility model in prospective shadow mode.

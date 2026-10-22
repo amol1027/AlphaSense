@@ -65,6 +65,16 @@ Both APIs expose readiness endpoints for supervisors and uptime monitors:
 
 The prediction `/health` returns HTTP 503 with per-check detail (`market_cache`, `model_artifacts`, `upstox_token_configured`, `webapp`) instead of an unconditional 200. On Linux, `deploy/systemd/` holds units for all three services (prediction, auth, shadow) with restart policies; adjust `User=`/paths before installing.
 
+### Daily shadow health check
+
+Schedule one check after the market close each weekday (16:05 IST). It verifies the Upstox token, that the cache was refreshed during the last trading session, and that the prediction log covered that session; failures exit 1 and email `ALERT_EMAIL`/`SMTP_FROM` when configured:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/check_shadow_health.py
+```
+
+On Windows, a daily Task Scheduler action runs the same command; run it manually any time — coverage is deferred while a session is still fresh, so mid-day runs produce no false alarm.
+
 ## Common startup issues
 
 - **“Live market cache is missing”**: start the shadow runner and wait for a successful refresh.
