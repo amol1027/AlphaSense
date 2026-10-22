@@ -1254,6 +1254,5 @@ by the freshness gate, and predictions whose 1h label window would run past
 the session close are skipped. First prospective readout (n=340, 10 sessions):
 edge beats majority prospectively for RELIANCE/ICICIBANK, sits at/below for
 HDFCBANK/INFY/TCS — see `docs/shadow_readouts.md`. No direction/news
-re-tuning; locked holdout stays scored-once. Commits pending owner review
-(working tree intentionally uncommitted).
+re-tuning; locked holdout stays scored-once.
 ```
