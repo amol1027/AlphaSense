@@ -14,7 +14,7 @@
 
 **Phase 4 — Volatility-regime pilot: PASS (see `docs/phase_4_pilot.md`)**
 
-**Current test status: 256 passed, 2 warnings**
+**Current test status: 343 passed, 11 warnings**
 
 The project currently covers:
 
@@ -53,7 +53,7 @@ Direction prediction is frozen as negative: on 5 assets / 130 walk-forward folds
 
 Range-regime (volatility) prediction passes robustly: 130/130 folds won, median +13.9pp, locked holdout beaten on all 5 assets (up to 0.68 vs 0.50 baseline). Edge decays with horizon (30m ≈ 1h > 2h > 4h); 1h frozen. See `docs/phase_3_results.md` and `docs/phase_4_pilot.md`.
 
-**Next milestone: run the frozen 9-feature, 1h volatility model in prospective shadow mode. Refresh completed 15m Upstox candles into `data/interim/live_market_15m.csv`, serve and log predictions from that cache, then label them only after the next hour is present. No further direction/news iteration without a new hypothesis; locked holdout stays scored-once.**
+**Next milestone: run the frozen 9-feature, 1h volatility model in prospective shadow mode. Refresh completed 15m Upstox candles into `data/interim/live_market_15m.csv`, serve and log predictions from that cache, then label them only after the next hour is present. Shadow readouts are recorded in `docs/shadow_readouts.md`. No further direction/news iteration without a new hypothesis; locked holdout stays scored-once.**
 
 To start the local dashboard and shadow runner, see [docs/STARTING_THE_APP.md](docs/STARTING_THE_APP.md).
 
@@ -1240,7 +1240,7 @@ Phase 4 — PASS (range-regime volatility pilot: 130/130 folds, minimal 9-feat
 set frozen, 1h horizon frozen; news-on-top FAIL)
 
 Tests:
-256 passed, 2 warnings
+343 passed, 11 warnings
 
 Next:
 Run the frozen 9-feature, 1h volatility model in prospective shadow mode.
@@ -1250,6 +1250,10 @@ fresh predictions during NSE hours. Original research market files are kept.
 Run `python -m src.prediction.server` separately to serve the local dashboard/
 API; it reads the refresher's cache. The refresh uses
 `UPSTOX_ACCESS_TOKEN`; historical seed bars are excluded from prediction logs
-by the freshness gate. No direction/news re-tuning; locked holdout stays
-scored-once. Commits pending owner review (working tree intentionally uncommitted).
+by the freshness gate, and predictions whose 1h label window would run past
+the session close are skipped. First prospective readout (n=340, 10 sessions):
+edge beats majority prospectively for RELIANCE/ICICIBANK, sits at/below for
+HDFCBANK/INFY/TCS — see `docs/shadow_readouts.md`. No direction/news
+re-tuning; locked holdout stays scored-once. Commits pending owner review
+(working tree intentionally uncommitted).
 ```
