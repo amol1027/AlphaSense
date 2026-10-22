@@ -169,6 +169,7 @@ export function MarketDashboard({ onNavigate, search }: { onNavigate: (path: str
   const [sort, setSort] = useState(() => parseMarketSearch(window.location.search).sort)
   const [refreshing, setRefreshing] = useState(false)
   const [refreshMessage, setRefreshMessage] = useState('')
+  const [justUpdated, setJustUpdated] = useState(false)
   const [detailAsset, setDetailAsset] = useState<Asset | null>(() => parseMarketSearch(window.location.search).stock)
   const [interval, setInterval] = useState<Interval>(() => parseMarketSearch(window.location.search).interval)
   const [chartStyle, setChartStyle] = useState<'candles' | 'line'>('candles')
@@ -203,6 +204,13 @@ export function MarketDashboard({ onNavigate, search }: { onNavigate: (path: str
   }
   const triggerRef = useRef<HTMLElement | null>(null)
   const dialogRef = useRef<HTMLElement | null>(null)
+  const prevCheckedAt = useRef<string | null>(null)
+  const flashTimer = useRef<number | null>(null)
+
+  // Clear the new-data flash timer on unmount.
+  useEffect(() => () => {
+    if (flashTimer.current !== null) window.clearTimeout(flashTimer.current)
+  }, [])
 
   const openDetail = useCallback((asset: Asset, trigger: HTMLElement | null) => {
     // Failed cards are inert: no dialog, no chart fetch.
@@ -252,6 +260,13 @@ export function MarketDashboard({ onNavigate, search }: { onNavigate: (path: str
       const response = await fetch(`${API}/dashboard`)
       if (!response.ok) throw new Error(`Prediction service returned ${response.status}.`)
       const data = await response.json() as Snapshot
+      if (prevCheckedAt.current !== null && data.checked_at > prevCheckedAt.current) {
+        // Fresh predictions arrived (auto-refresh or manual): flash the badge.
+        setJustUpdated(true)
+        if (flashTimer.current !== null) window.clearTimeout(flashTimer.current)
+        flashTimer.current = window.setTimeout(() => setJustUpdated(false), 4000)
+      }
+      prevCheckedAt.current = data.checked_at
       setSnapshot(data)
       setServiceError('')
     } catch {
@@ -441,7 +456,7 @@ export function MarketDashboard({ onNavigate, search }: { onNavigate: (path: str
     </section>
 
     <section className="market-outlook" aria-labelledby="outlook-title">
-      <div className="market-section-head"><div><p className="eyebrow">NEXT HOUR / MODEL ESTIMATE</p><h2 id="outlook-title">Latest outlook</h2></div><div className="market-section-meta"><span>Checked {latest} IST</span><button type="button" className="market-refresh" onClick={() => void refreshMarket()} disabled={refreshing}><RefreshCw size={14} className={refreshing ? 'is-spinning' : ''} />{refreshing ? 'Fetching data' : 'Fetch latest data'}</button></div></div>
+      <div className="market-section-head"><div><p className="eyebrow">NEXT HOUR / MODEL ESTIMATE</p><h2 id="outlook-title">Latest outlook</h2></div><div className="market-section-meta"><span>Checked {latest} IST</span>{justUpdated && <span className="market-updated-flash" role="status">Updated just now</span>}<button type="button" className="market-refresh" onClick={() => void refreshMarket()} disabled={refreshing}><RefreshCw size={14} className={refreshing ? 'is-spinning' : ''} />{refreshing ? 'Fetching data' : 'Fetch latest data'}</button></div></div>
       <div className="market-toolbar"><label><span>SHOW</span><select value={filter} onChange={event => updateView({ filter: event.target.value })}><option value="all">All five equities</option>{ASSETS.map(item => <option key={item.symbol} value={item.symbol}>{item.short}</option>)}</select></label><label><span>ORDER</span><select value={sort} onChange={event => updateView({ sort: event.target.value })}><option value="default">Research order</option><option value="high">Higher larger-move chance</option><option value="low">Lower larger-move chance</option></select></label><div className="market-segment" aria-label="Watchlist filter"><button type="button" className={starredOnly ? 'active' : ''} onClick={() => setStarredOnly(value => !value)} aria-pressed={starredOnly}>★ Starred{starred.length ? ` (${starred.length})` : ''}</button></div><span className="market-click-hint">Select a company to inspect price history and model inputs <span aria-hidden="true">↗</span></span></div>
 
       {serviceError ? <div className="market-service-error"><span className="market-error-code">API / 8000</span><div><strong>Market service unavailable</strong><p>{serviceError}</p><code>python -m src.prediction.server</code></div><button type="button" onClick={() => void loadSnapshot()}>Retry</button></div> : null}
