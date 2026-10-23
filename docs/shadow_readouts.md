@@ -62,6 +62,32 @@ grows. Wilson intervals are on accuracy, not BA.
   were labeled; near-close slots have no label by construction.
 - The logging gate now prevents future unlabelable rows.
 
+## Pre-registered verdict rule (locked 2026-10-22, before Readout 2)
+
+Shadow verdicts are judged against a frozen rule, set now so future readouts
+are not scored against moving goalposts. Readout 1 is diagnostic only and does
+not count toward any verdict.
+
+- Blocks are cumulative: each verdict readout happens at the first scoring run
+  after at least 20 further scored sessions, and requires ≥ 30 scored sessions
+  per asset in the cumulative window. A block is scored once.
+- Metric per asset: accuracy vs the majority base (share of the modal realized
+  label over the same scored rows), with Wilson 95% intervals. Balanced
+  accuracy is diagnostic only — it double-counts rare-class skill in a way the
+  never-bet baseline does not.
+- Verdict per asset:
+  - **ENABLE** — accuracy CI lower bound > majority base (edge survives the
+    interval floor).
+  - **DISABLE** — accuracy CI upper bound < majority base (edge absent at the
+    interval ceiling).
+  - Otherwise **INCONCLUSIVE** — keep shadowing, no action.
+- A DISABLE or INCONCLUSIVE verdict never pauses the run; the log keeps
+  accruing under identical tooling. Any tooling or definition change after the
+  first verdict-scoring run restarts the relevant block under versioned tooling.
+- The locked 2026-08-10+ research holdout stays scored-once regardless of
+  shadow outcomes; shadow data is heldout-adjacent and may not be folded back
+  into any tuning decision.
+
 ## Next
 
 - Keep the shadow run going; re-score periodically and append Readout 2+ here.
