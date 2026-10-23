@@ -724,83 +724,34 @@ AlphaSense/
 │
 ├── data/
 │   ├── raw/
-│   │   ├── market/
-│   │   │   ├── tcs_15m.csv
-│   │   │   ├── reliance_15m.csv
-│   │   │   └── research_market_15m.csv
+│   │   ├── market/        # per-asset 15m candles (Phase 1 five-asset set)
 │   │   ├── news/
-│   │   │   └── research_news.csv
-│   │   ├── reddit_sample.csv
-│   │   └── market_holiday_sample.csv
-│   │
-│   ├── processed/
-│   │   └── research_news_sentiment.csv
-│   │
-│   └── reference/
-│       └── nse_bse_holidays_2026.json
+│   │   └── attention/     # Google Trends daily interest snapshots
+│   ├── interim/
+│   │   └── live_log.csv   # prospective shadow prediction log (git-tracked)
+│   ├── processed/         # sentiment feature outputs
+│   └── reference/         # NSE/BSE holiday JSONs 2024–2026
 │
-├── scripts/
-│   │
-│   ├── Data collection
-│   │   ├── download_market_data.py
-│   │   ├── collect_historical_news.py
-│   │   └── build_research_market.py
-│   │
-│   ├── Sentiment processing
-│   │   └── process_historical_news_sentiment.py
-│   │
-│   ├── Evaluation
-│   │   ├── evaluate_real_logistic.py
-│   │   ├── evaluate_real_baseline.py
-│   │   ├── evaluate_feature_ablation.py
-│   │   ├── evaluate_asset_ablation.py
-│   │   ├── evaluate_logistic_by_asset.py
-│   │   ├── evaluate_logistic_per_asset.py
-│   │   ├── evaluate_baseline.py
-│   │   └── evaluate_walk_forward.py
-│   │
-│   └── Diagnostics
-│       ├── inspect_real_targets.py
-│       ├── check_news_overlap.py
-│       ├── check_upstox_news_api.py
-│       ├── resolve_instruments.py
-│       └── test_historical_request.py
+├── deploy/systemd/        # prediction, auth, shadow service units (Linux)
+├── docs/                  # phase results, shadow readouts, run guides
+│
+├── scripts/               # collection, evaluation, diagnostics, shadow ops
 │
 ├── src/
+│   ├── auth/              # FastAPI account service (MySQL sessions/admins)
 │   ├── features/
-│   │   ├── build_features.py
-│   │   ├── market_time.py
-│   │   ├── session_windows.py
-│   │   ├── trading_calendar.py
-│   │   ├── targets.py
-│   │   ├── sentiment_features.py
-│   │   ├── reddit_features.py
-│   │   └── time_windows.py
-│   │
 │   ├── ingestion/
-│   │   ├── loader.py
-│   │   ├── reddit_loader.py
+│   │   ├── market/
 │   │   └── news/
-│   │
-│   ├── sentiment/
-│   │   ├── finbert.py
-│   │   ├── pipeline.py
-│   │   ├── news_preparation.py
-│   │   ├── hourly_aggregation.py
-│   │   └── schemas.py
-│   │
-│   └── modeling/
-│       ├── dataset.py
-│       ├── splits.py
-│       ├── logistic.py
-│       ├── baseline.py
-│       ├── baseline_runner.py
-│       ├── benchmark.py
-│       └── evaluation.py
+│   ├── modeling/
+│   ├── notifications/     # SMTP / WhatsApp senders, dispatcher, rules
+│   ├── prediction/        # frozen-bundle serving API (port 8000)
+│   └── sentiment/
 │
 ├── tests/
-│   └── ...
+├── website/               # Vite + React dashboard and research site
 │
+├── artifacts/             # frozen model bundles (local build output)
 ├── .gitignore
 └── README.md
 ```
@@ -1111,6 +1062,43 @@ python scripts/check_shadow_health.py
 
 Return codes: exit 0 = healthy; exit 1 = failed check and an alert was
 attempted.
+
+## Live Shadow Mode
+
+The prospective shadow run (see `docs/shadow_readouts.md`) is operated by:
+
+### `train_volatility_model.py`
+
+Retrains the frozen 9-feature volatility bundles per asset from data
+predating the locked holdout and writes them to `artifacts/volatility/`.
+The model, threshold, and feature set were frozen in Phase 4; run this
+only when defining a new frozen bundle, never to tune shadow results.
+
+### `run_shadow.py`
+
+The scheduler loop: wakes just after each 15m bar boundary (plus a
+2-minute completion delay) during NSE hours, then refresh → label →
+log. Boot fails loudly on an invalid Upstox token.
+
+### `refresh_live_market.py`
+
+Rolling 7-day 15m candle cache refresh (`data/interim/live_market_15m.csv`)
+plus `live_status.json`. Seeded once from the Phase 1 per-asset files;
+original research files are never modified.
+
+### `log_live_prediction.py`
+
+Appends predictions to `data/interim/live_log.csv` (keyed by asset +
+prediction timestamp, re-run safe) and labels realized outcomes once the
+next hour's bars exist. Predictions whose 1h label window would run past
+the session close are gated out.
+
+### `score_shadow.py`
+
+Read-only scorer for the shadow log: stale-filtered, per-asset accuracy
+with Wilson 95% CIs and balanced accuracy, plus pooled cut. Never touches
+the model, artifacts, or locked research data. All shadow verdict rules
+live in `docs/shadow_readouts.md`.
 
 ---
 
